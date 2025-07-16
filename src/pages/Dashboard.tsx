@@ -14,9 +14,9 @@ import {
 const Dashboard = () => {
   // Mock data para o próximo evento
   const nextEvent = {
-    eventName: "Enduro Championship 2024",
-    location: "Serra da Estrela, Portugal",
-    date: new Date('2024-08-15T09:00:00')
+    eventName: "Resistência de 1h",
+    location: "Alfândega da Fé, Portugal",
+    date: new Date('2025-08-02T09:00:00')
   };
 
   // Mock data para press releases
@@ -70,6 +70,7 @@ const Dashboard = () => {
         eventName={nextEvent.eventName}
         location={nextEvent.location}
         date={nextEvent.date}
+        backgroundImage="/lovable-uploads/20c68fe8-f328-4e28-a945-fd12a9bc57a5.png"
       />
 
       {/* Métricas Resumo */}
