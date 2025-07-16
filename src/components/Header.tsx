@@ -23,7 +23,7 @@ const Header = () => {
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">SportsPro</h1>
+              <h1 className="text-xl font-bold text-foreground">Enduro Sponsor</h1>
               <p className="text-xs text-muted-foreground">Plataforma de Patrocínios</p>
             </div>
           </div>

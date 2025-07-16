@@ -1,53 +1,83 @@
 import MetricCard from "@/components/MetricCard";
-import VisibilityChart from "@/components/VisibilityChart";
-import SponsorshipValue from "@/components/SponsorshipValue";
-import RecentActivity from "@/components/RecentActivity";
+import NextEventBanner from "@/components/NextEventBanner";
+import PressReleaseCard from "@/components/PressReleaseCard";
+import InstagramPostCard from "@/components/InstagramPostCard";
 import { 
-  TrendingUp, 
-  Users, 
-  Calendar, 
   MapPin, 
-  Camera,
+  Calendar, 
+  Users,
   Award,
-  Zap
+  Camera,
+  TrendingUp
 } from "lucide-react";
 
 const Dashboard = () => {
-  return (
-    <div className="space-y-6">
-      {/* Hero Section */}
-      <div className="gradient-subtle rounded-xl p-8 border">
-        <div className="max-w-2xl">
-          <h1 className="text-3xl font-bold mb-2">
-            Bem-vindo ao SportsPro Dashboard
-          </h1>
-          <p className="text-muted-foreground text-lg mb-6">
-            Plataforma profissional para gestão e apresentação de projetos desportivos. 
-            Acompanhe métricas, gerencie patrocínios e maximize o retorno de visibilidade.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <div className="flex items-center space-x-2 text-sm">
-              <div className="w-2 h-2 bg-secondary rounded-full"></div>
-              <span>Sistema em tempo real</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm">
-              <div className="w-2 h-2 bg-accent rounded-full"></div>
-              <span>Dados verificados</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm">
-              <div className="w-2 h-2 bg-primary rounded-full"></div>
-              <span>ROI transparente</span>
-            </div>
-          </div>
-        </div>
-      </div>
+  // Mock data para o próximo evento
+  const nextEvent = {
+    eventName: "Enduro Championship 2024",
+    location: "Serra da Estrela, Portugal",
+    date: new Date('2024-08-15T09:00:00')
+  };
 
-      {/* Key Metrics Grid */}
+  // Mock data para press releases
+  const pressReleases = [
+    {
+      id: '1',
+      title: 'Nova Parceria com Husqvarna Portugal',
+      date: new Date('2024-07-10'),
+      excerpt: 'Anunciamos uma nova parceria estratégica que reforça nosso compromisso com a excelência no enduro. Esta colaboração...'
+    },
+    {
+      id: '2', 
+      title: 'Vitória no Campeonato Nacional de Enduro',
+      date: new Date('2024-07-05'),
+      excerpt: 'Conquistámos o primeiro lugar na categoria Elite, demonstrando a qualidade do nosso equipamento e preparação...'
+    },
+    {
+      id: '3',
+      title: 'Inauguração de Nova Base de Treinos',
+      date: new Date('2024-06-28'),
+      excerpt: 'A nossa nova base de treinos em Viseu está agora operacional, oferecendo instalações de última geração...'
+    }
+  ];
+
+  // Mock data para posts do Instagram
+  const instagramPosts = [
+    {
+      id: '1',
+      imageUrl: '/placeholder.svg',
+      likes: 2847,
+      caption: 'Treino intensivo na Serra da Estrela! 💪 Preparação para o próximo campeonato está a todo o vapor. #enduro #training'
+    },
+    {
+      id: '2',
+      imageUrl: '/placeholder.svg', 
+      likes: 1923,
+      caption: 'Nova parceria com a Husqvarna! 🏍️ Equipamento de topo para os maiores desafios. #husqvarna #partnership'
+    },
+    {
+      id: '3',
+      imageUrl: '/placeholder.svg',
+      likes: 3156,
+      caption: 'Vitória no campeonato nacional! 🏆 Obrigado a todos os nossos apoiantes e patrocinadores. #victory #enduro'
+    }
+  ];
+
+  return (
+    <div className="space-y-8">
+      {/* Hero Banner - Próximo Evento */}
+      <NextEventBanner
+        eventName={nextEvent.eventName}
+        location={nextEvent.location}
+        date={nextEvent.date}
+      />
+
+      {/* Métricas Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
-          title="Quilómetros Percorridos"
+          title="Km Percorridos Esta Época"
           value="2.847 km"
-          change="+12% vs mês anterior"
+          change="+12% vs época anterior"
           changeType="positive"
           icon={MapPin}
           gradient="primary"
@@ -55,63 +85,66 @@ const Dashboard = () => {
         <MetricCard
           title="Eventos Realizados"
           value="23"
-          change="+4 este mês"
+          change="5 vitórias conquistadas"
           changeType="positive"
           icon={Calendar}
           gradient="performance"
         />
         <MetricCard
-          title="Alcance nas Redes"
+          title="Visualizações nas Redes"
           value="127.5K"
-          change="+8.2% crescimento"
+          change="+18% este mês"
           changeType="positive"
           icon={Users}
           gradient="energy"
         />
         <MetricCard
-          title="Marcas Expostas"
+          title="Marcas Visíveis"
           value="15"
-          change="5 parceiros ativos"
+          change="8 parceiros principais"
           changeType="neutral"
           icon={Award}
         />
       </div>
 
-      {/* Charts and Analytics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <VisibilityChart />
-        <SponsorshipValue />
-      </div>
-
-      {/* Recent Activity */}
+      {/* Secções Secundárias */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <RecentActivity />
+        {/* Press Releases */}
+        <div className="lg:col-span-1">
+          <PressReleaseCard pressReleases={pressReleases} />
         </div>
-        
-        {/* Quick Stats */}
-        <div className="space-y-4">
+
+        {/* Posts Instagram */}
+        <div className="lg:col-span-1">
+          <InstagramPostCard posts={instagramPosts} />
+        </div>
+
+        {/* Métricas Adicionais */}
+        <div className="lg:col-span-1 space-y-4">
           <MetricCard
-            title="Próximo Evento"
-            value="Ultra Trail"
-            change="15 de Fevereiro"
-            icon={Calendar}
+            title="Alcance Mensal"
+            value="45.2K"
+            change="+23% crescimento"
+            changeType="positive"
+            icon={TrendingUp}
+            gradient="performance"
             className="h-fit"
           />
           <MetricCard
             title="Conteúdo Produzido"
             value="156"
             change="Posts este mês"
+            changeType="neutral"
             icon={Camera}
             className="h-fit"
           />
           <MetricCard
-            title="Performance Score"
-            value="94%"
-            change="Excelente"
+            title="Engagement Rate"
+            value="8.4%"
+            change="Acima da média"
             changeType="positive"
-            icon={Zap}
-            gradient="performance"
+            icon={Users}
+            gradient="energy"
             className="h-fit"
           />
         </div>
