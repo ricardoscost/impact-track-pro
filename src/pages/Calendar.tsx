@@ -2,6 +2,8 @@ import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Calendar as CalendarIcon, 
   MapPin, 
@@ -12,49 +14,36 @@ import {
 } from "lucide-react";
 
 const Calendar = () => {
-  const events = [
-    {
-      id: 1,
-      title: "Ultra Trail Serra da Estrela",
-      date: "2024-02-15",
-      time: "08:00",
-      location: "Covilhã, Portugal",
-      type: "trail",
-      status: "confirmado",
-      participants: 450,
-      sponsors: ["Brand A", "Brand B", "Brand C"],
-    },
-    {
-      id: 2,
-      title: "Maratona de Lisboa",
-      date: "2024-03-10",
-      time: "09:00",
-      location: "Lisboa, Portugal",
-      type: "maratona",
-      status: "inscrito",
-      participants: 15000,
-      sponsors: ["Brand A", "Brand D"],
-    },
-    {
-      id: 3,
-      title: "Treino Técnico - Montanha",
-      date: "2024-02-28",
-      time: "16:00",
-      location: "Sintra, Portugal",
-      type: "treino",
-      status: "planeado",
-      participants: 12,
-      sponsors: ["Brand C"],
-    },
-  ];
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('date', { ascending: true });
+      
+      if (error) throw error;
+      setEvents(data || []);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "confirmado":
+      case "confirmed":
         return "bg-secondary/20 text-secondary border-secondary/30";
-      case "inscrito":
+      case "registered":
         return "bg-primary/20 text-primary border-primary/30";
-      case "planeado":
+      case "scheduled":
         return "bg-accent/20 text-accent border-accent/30";
       default:
         return "bg-muted text-muted-foreground";
@@ -62,15 +51,15 @@ const Calendar = () => {
   };
 
   const getTypeColor = (type: string) => {
-    switch (type) {
-      case "trail":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "maratona":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "treino":
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+    const lowerType = type.toLowerCase();
+    if (lowerType.includes('trail')) {
+      return "bg-green-100 text-green-800 border-green-200";
+    } else if (lowerType.includes('maratona')) {
+      return "bg-blue-100 text-blue-800 border-blue-200";  
+    } else if (lowerType.includes('treino')) {
+      return "bg-purple-100 text-purple-800 border-purple-200";
+    } else {
+      return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
@@ -108,7 +97,7 @@ const Calendar = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Próximos 30 dias</p>
-                <p className="text-2xl font-bold">3 eventos</p>
+                <p className="text-2xl font-bold">{events.length} eventos</p>
               </div>
             </div>
           </CardContent>
@@ -122,7 +111,9 @@ const Calendar = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total de Participantes</p>
-                <p className="text-2xl font-bold">15.462</p>
+                <p className="text-2xl font-bold">
+                  {events.reduce((sum, event) => sum + (event.participants || 0), 0).toLocaleString()}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -150,7 +141,14 @@ const Calendar = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {events.map((event) => (
+            {loading ? (
+              <div className="text-center py-8">Carregando eventos...</div>
+            ) : events.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Nenhum evento encontrado
+              </div>
+            ) : (
+            events.map((event) => (
               <div
                 key={event.id}
                 className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-smooth"
@@ -176,10 +174,10 @@ const Calendar = () => {
                         <MapPin className="w-3 h-3" />
                         <span>{event.location}</span>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <Users className="w-3 h-3" />
-                        <span>{event.participants.toLocaleString()} participantes</span>
-                      </div>
+                       <div className="flex items-center space-x-1">
+                         <Users className="w-3 h-3" />
+                         <span>{event.participants} participantes</span>
+                       </div>
                     </div>
                   </div>
                 </div>
@@ -197,13 +195,14 @@ const Calendar = () => {
                   >
                     {event.status}
                   </Badge>
-                  <div className="text-xs text-muted-foreground">
-                    {event.sponsors.length} patrocinadores
-                  </div>
+                   <div className="text-xs text-muted-foreground">
+                     {event.sponsors} patrocinadores
+                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+               </div>
+             ))
+            )}
+           </div>
         </CardContent>
       </Card>
       </main>

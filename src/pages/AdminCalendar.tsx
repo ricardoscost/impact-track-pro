@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,89 +24,133 @@ const AdminCalendar = () => {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      title: "Ultra Trail Serra da Estrela",
-      date: "2024-02-15",
-      time: "08:00",
-      location: "Covilhã, Portugal",
-      type: "trail",
-      status: "confirmado",
-      participants: 450,
-      sponsors: ["Brand A", "Brand B", "Brand C"],
-    },
-    {
-      id: 2,
-      title: "Maratona de Lisboa",
-      date: "2024-03-10",
-      time: "09:00",
-      location: "Lisboa, Portugal",
-      type: "maratona",
-      status: "inscrito",
-      participants: 15000,
-      sponsors: ["Brand A", "Brand D"],
-    },
-  ]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     title: '',
+    description: '',
     date: '',
     time: '',
     location: '',
-    type: 'trail',
-    status: 'planeado',
+    type: '',
+    status: 'scheduled',
     participants: '',
-    sponsors: ''
+    sponsors: '',
+    background_image_url: ''
   });
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('date', { ascending: true });
+      
+      if (error) throw error;
+      setEvents(data || []);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar eventos",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newEvent = {
-      ...formData,
-      id: events.length + 1,
-      participants: parseInt(formData.participants),
-      sponsors: formData.sponsors.split(',').map(s => s.trim())
-    };
-    
-    setEvents([...events, newEvent]);
-    setFormData({
-      title: '',
-      date: '',
-      time: '',
-      location: '',
-      type: 'trail',
-      status: 'planeado',
-      participants: '',
-      sponsors: ''
-    });
-    setShowForm(false);
-    
-    toast({
-      title: "Evento adicionado",
-      description: "O evento foi adicionado com sucesso",
-    });
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .insert({
+          title: formData.title,
+          description: formData.description,
+          date: formData.date,
+          time: formData.time,
+          location: formData.location,
+          type: formData.type,
+          status: formData.status,
+          participants: parseInt(formData.participants) || 0,
+          sponsors: parseInt(formData.sponsors) || 0,
+          background_image_url: formData.background_image_url
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      setEvents([...events, data]);
+      setFormData({
+        title: '',
+        description: '',
+        date: '',
+        time: '',
+        location: '',
+        type: '',
+        status: 'scheduled',
+        participants: '',
+        sponsors: '',
+        background_image_url: ''
+      });
+      setShowForm(false);
+      
+      toast({
+        title: "Evento adicionado",
+        description: "O evento foi adicionado com sucesso",
+      });
+    } catch (error) {
+      console.error('Error creating event:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar evento",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleDelete = (id: number) => {
-    setEvents(events.filter(e => e.id !== id));
-    toast({
-      title: "Evento removido",
-      description: "O evento foi removido com sucesso",
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      setEvents(events.filter(e => e.id !== id));
+      toast({
+        title: "Evento removido",
+        description: "O evento foi removido com sucesso",
+      });
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao remover evento",
+        variant: "destructive"
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "confirmado":
+      case "confirmed":
         return "bg-secondary/20 text-secondary border-secondary/30";
-      case "inscrito":
+      case "registered":
         return "bg-primary/20 text-primary border-primary/30";
-      case "planeado":
+      case "scheduled":
         return "bg-accent/20 text-accent border-accent/30";
       default:
         return "bg-muted text-muted-foreground";
@@ -154,19 +199,16 @@ const AdminCalendar = () => {
                   />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="type">Tipo</Label>
-                  <select
-                    id="type"
-                    value={formData.type}
-                    onChange={(e) => setFormData({...formData, type: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-md"
-                  >
-                    <option value="trail">Trail</option>
-                    <option value="maratona">Maratona</option>
-                    <option value="treino">Treino</option>
-                  </select>
-                </div>
+                 <div className="space-y-2">
+                   <Label htmlFor="type">Tipo</Label>
+                   <Input
+                     id="type"
+                     value={formData.type}
+                     onChange={(e) => setFormData({...formData, type: e.target.value})}
+                     placeholder="ex: Trail, Maratona, Treino"
+                     required
+                   />
+                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="date">Data</Label>
@@ -211,31 +253,52 @@ const AdminCalendar = () => {
                   />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="status">Estado</Label>
-                  <select
-                    id="status"
-                    value={formData.status}
-                    onChange={(e) => setFormData({...formData, status: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-md"
-                  >
-                    <option value="planeado">Planeado</option>
-                    <option value="inscrito">Inscrito</option>
-                    <option value="confirmado">Confirmado</option>
-                  </select>
-                </div>
+                 <div className="space-y-2">
+                   <Label htmlFor="status">Estado</Label>
+                   <select
+                     id="status"
+                     value={formData.status}
+                     onChange={(e) => setFormData({...formData, status: e.target.value})}
+                     className="w-full px-3 py-2 border rounded-md"
+                   >
+                     <option value="scheduled">Agendado</option>
+                     <option value="registered">Inscrito</option>
+                     <option value="confirmed">Confirmado</option>
+                   </select>
+                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="sponsors">Patrocinadores (separados por vírgula)</Label>
-                  <Input
-                    id="sponsors"
-                    value={formData.sponsors}
-                    onChange={(e) => setFormData({...formData, sponsors: e.target.value})}
-                    placeholder="Brand A, Brand B, Brand C"
-                  />
-                </div>
+                 <div className="space-y-2">
+                   <Label htmlFor="sponsors">Número de Patrocinadores</Label>
+                   <Input
+                     id="sponsors"
+                     type="number"
+                     value={formData.sponsors}
+                     onChange={(e) => setFormData({...formData, sponsors: e.target.value})}
+                     placeholder="0"
+                   />
+                 </div>
+                 
+                 <div className="space-y-2">
+                   <Label htmlFor="description">Descrição</Label>
+                   <Textarea
+                     id="description"
+                     value={formData.description}
+                     onChange={(e) => setFormData({...formData, description: e.target.value})}
+                     placeholder="Descrição do evento"
+                   />
+                 </div>
+                 
+                 <div className="space-y-2">
+                   <Label htmlFor="background_image_url">URL da Imagem de Fundo</Label>
+                   <Input
+                     id="background_image_url"
+                     value={formData.background_image_url}
+                     onChange={(e) => setFormData({...formData, background_image_url: e.target.value})}
+                     placeholder="https://example.com/image.jpg"
+                   />
+                 </div>
                 
-                <div className="md:col-span-2 flex space-x-2">
+                <div className="md:col-span-3 flex space-x-2">
                   <Button type="submit" variant="gradient">
                     Adicionar Evento
                   </Button>
@@ -255,7 +318,14 @@ const AdminCalendar = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {events.map((event) => (
+              {loading ? (
+                <div className="text-center py-8">Carregando eventos...</div>
+              ) : events.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Nenhum evento encontrado
+                </div>
+              ) : (
+              events.map((event) => (
                 <div
                   key={event.id}
                   className="flex items-center justify-between p-4 border rounded-lg"
@@ -281,10 +351,10 @@ const AdminCalendar = () => {
                           <MapPin className="w-3 h-3" />
                           <span>{event.location}</span>
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <Users className="w-3 h-3" />
-                          <span>{event.participants.toLocaleString()} participantes</span>
-                        </div>
+                         <div className="flex items-center space-x-1">
+                           <Users className="w-3 h-3" />
+                           <span>{event.participants} participantes</span>
+                         </div>
                       </div>
                     </div>
                   </div>
@@ -307,8 +377,9 @@ const AdminCalendar = () => {
                       <Trash className="w-4 h-4" />
                     </Button>
                   </div>
-                </div>
-              ))}
+                 </div>
+               ))
+              )}
             </div>
           </CardContent>
         </Card>

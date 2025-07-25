@@ -2,6 +2,8 @@ import MetricCard from "@/components/MetricCard";
 import NextEventBanner from "@/components/NextEventBanner";
 import PressReleaseCard from "@/components/PressReleaseCard";
 import InstagramPostCard from "@/components/InstagramPostCard";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   MapPin, 
   Calendar, 
@@ -12,11 +14,39 @@ import {
 } from "lucide-react";
 
 const Dashboard = () => {
-  // Mock data para o próximo evento
-  const nextEvent = {
-    eventName: "Resistência de 1h",
-    location: "Alfândega da Fé, Portugal",
-    date: new Date('2025-08-02T09:00:00')
+  const [nextEvent, setNextEvent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchNextEvent();
+  }, []);
+
+  const fetchNextEvent = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .gte('date', new Date().toISOString().split('T')[0])
+        .order('date', { ascending: true })
+        .limit(1)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      
+      if (data) {
+        const eventDateTime = new Date(`${data.date}T${data.time}`);
+        setNextEvent({
+          eventName: data.title,
+          location: data.location,
+          date: eventDateTime,
+          backgroundImage: data.background_image_url
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching next event:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Mock data para press releases
@@ -66,12 +96,20 @@ const Dashboard = () => {
   return (
     <div className="space-y-8">
       {/* Hero Banner - Próximo Evento */}
-      <NextEventBanner
-        eventName={nextEvent.eventName}
-        location={nextEvent.location}
-        date={nextEvent.date}
-        backgroundImage="/lovable-uploads/20c68fe8-f328-4e28-a945-fd12a9bc57a5.png"
-      />
+      {loading ? (
+        <div className="text-center py-12">Carregando próximo evento...</div>
+      ) : nextEvent ? (
+        <NextEventBanner
+          eventName={nextEvent.eventName}
+          location={nextEvent.location}
+          date={nextEvent.date}
+          backgroundImage={nextEvent.backgroundImage || "/lovable-uploads/20c68fe8-f328-4e28-a945-fd12a9bc57a5.png"}
+        />
+      ) : (
+        <div className="text-center py-12 text-muted-foreground">
+          Nenhum evento programado
+        </div>
+      )}
 
       {/* Métricas Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
