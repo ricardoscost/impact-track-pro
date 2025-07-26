@@ -7,7 +7,8 @@ import {
   BarChart3, 
   ImageIcon, 
   LogOut,
-  Settings
+  Settings,
+  Award
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -39,6 +40,13 @@ const Admin = () => {
       icon: ImageIcon,
       path: "/admin/gallery",
       color: "text-accent"
+    },
+    {
+      title: "Patrocinadores",
+      description: "Gerir patrocinadores e parcerias",
+      icon: Award,
+      path: "/admin/sponsors",
+      color: "text-secondary"
     }
   ];
 

@@ -7,11 +7,13 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Calendar from "./pages/Calendar";
 import Gallery from "./pages/Gallery";
+import Sponsors from "./pages/Sponsors";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import AdminCalendar from "./pages/AdminCalendar";
 import AdminGallery from "./pages/AdminGallery";
 import AdminMetrics from "./pages/AdminMetrics";
+import AdminSponsors from "./pages/AdminSponsors";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,11 +29,13 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/gallery" element={<Gallery />} />
+            <Route path="/sponsors" element={<Sponsors />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/calendar" element={<AdminCalendar />} />
             <Route path="/admin/gallery" element={<AdminGallery />} />
             <Route path="/admin/metrics" element={<AdminMetrics />} />
+            <Route path="/admin/sponsors" element={<AdminSponsors />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

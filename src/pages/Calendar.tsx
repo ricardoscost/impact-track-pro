@@ -80,10 +80,6 @@ const Calendar = () => {
             <Filter className="w-4 h-4" />
             Filtrar
           </Button>
-          <Button variant="gradient">
-            <Plus className="w-4 h-4" />
-            Novo Evento
-          </Button>
         </div>
       </div>
 

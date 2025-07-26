@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Bell, Calendar, Camera, LogIn, Menu, TrendingUp } from "lucide-react";
+import { Bell, Calendar, Camera, Menu, TrendingUp, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useState } from "react";
 
 const Header = () => {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -11,6 +13,7 @@ const Header = () => {
     { path: "/", label: "Dashboard", icon: TrendingUp },
     { path: "/calendar", label: "Calendário", icon: Calendar },
     { path: "/gallery", label: "Galeria", icon: Camera },
+    { path: "/sponsors", label: "Patrocinadores", icon: Bell },
   ];
 
   return (
@@ -52,19 +55,42 @@ const Header = () => {
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full text-xs flex items-center justify-center text-white">
-                3
+                4
               </span>
             </Button>
-            <Button variant="gradient" size="sm" className="hidden sm:flex">
-              <LogIn className="w-4 h-4" />
-              Login Patrocinador
-            </Button>
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="w-5 h-5" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="md:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Navigation */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t bg-card/95 backdrop-blur-md">
+          <nav className="container mx-auto px-4 py-4 space-y-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link key={item.path} to={item.path} onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button
+                    variant={isActive(item.path) ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Icon className="w-4 h-4 mr-2" />
+                    {item.label}
+                  </Button>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      )}
     </header>
   );
 };
