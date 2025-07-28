@@ -47,6 +47,13 @@ const Admin = () => {
       icon: Award,
       path: "/admin/sponsors",
       color: "text-secondary"
+    },
+    {
+      title: "Press Releases",
+      description: "Gerir comunicados de imprensa",
+      icon: Settings,
+      path: "/admin/press-releases",
+      color: "text-primary"
     }
   ];
 

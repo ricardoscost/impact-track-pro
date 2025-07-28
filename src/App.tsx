@@ -14,6 +14,7 @@ import AdminCalendar from "./pages/AdminCalendar";
 import AdminGallery from "./pages/AdminGallery";
 import AdminMetrics from "./pages/AdminMetrics";
 import AdminSponsors from "./pages/AdminSponsors";
+import AdminPressReleases from "./pages/AdminPressReleases";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/admin/gallery" element={<AdminGallery />} />
             <Route path="/admin/metrics" element={<AdminMetrics />} />
             <Route path="/admin/sponsors" element={<AdminSponsors />} />
+            <Route path="/admin/press-releases" element={<AdminPressReleases />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

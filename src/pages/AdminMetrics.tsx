@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   ArrowLeft, 
   Save, 
@@ -22,28 +23,73 @@ import {
 const AdminMetrics = () => {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
-  
-  const [metrics, setMetrics] = useState({
-    totalParticipants: '15462',
-    activeEvents: '3',
-    citiesVisited: '8',
-    totalViews: '124500',
-    socialShares: '8942',
-    brandExposure: '2.4M',
-    sponsorSatisfaction: '95',
-    mediaDownloads: '1247'
-  });
+  const [loading, setLoading] = useState(true);
+  const [metricsData, setMetricsData] = useState<any[]>([]);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  const handleSave = () => {
-    // Aqui você salvaria as métricas no backend
-    toast({
-      title: "Métricas atualizadas",
-      description: "As métricas foram salvas com sucesso",
-    });
+  const fetchMetrics = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('metrics')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order');
+
+      if (error) throw error;
+      setMetricsData(data || []);
+    } catch (error) {
+      console.error('Error fetching metrics:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar métricas",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMetrics();
+  }, []);
+
+  const handleSave = async (metric: any, newValue: string) => {
+    try {
+      const { error } = await supabase
+        .from('metrics')
+        .update({ value: newValue })
+        .eq('id', metric.id);
+
+      if (error) throw error;
+
+      // Create notification
+      await supabase
+        .from('notifications')
+        .insert([
+          {
+            type: 'metrics',
+            title: 'Métrica atualizada',
+            message: `${metric.title} foi atualizada para ${newValue}`,
+            related_id: metric.id
+          }
+        ]);
+
+      await fetchMetrics();
+      toast({
+        title: "Métrica atualizada",
+        description: "A métrica foi salva com sucesso",
+      });
+    } catch (error) {
+      console.error('Error updating metric:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar métrica",
+        variant: "destructive"
+      });
+    }
   };
 
   const metricCards = [
@@ -123,40 +169,46 @@ const AdminMetrics = () => {
               </p>
             </div>
           </div>
-          <Button variant="gradient" onClick={handleSave}>
+          <Button variant="gradient" onClick={() => fetchMetrics()}>
             <Save className="w-4 h-4 mr-2" />
-            Guardar Alterações
+            Recarregar Métricas
           </Button>
         </div>
 
         {/* Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {metricCards.map((metric) => {
-            const Icon = metric.icon;
-            return (
-              <Card key={metric.key}>
+        {loading ? (
+          <div className="text-center py-8">
+            <p>A carregar métricas...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {metricsData.map((metric) => (
+              <Card key={metric.id}>
                 <CardHeader className="pb-2">
                   <div className="flex items-center space-x-2">
-                    <div className={`w-8 h-8 ${metric.gradient} rounded-lg flex items-center justify-center`}>
-                      <Icon className="w-4 h-4 text-white" />
+                    <div className={`w-8 h-8 gradient-${metric.gradient_type || 'primary'} rounded-lg flex items-center justify-center`}>
+                      <BarChart3 className="w-4 h-4 text-white" />
                     </div>
                     <CardTitle className="text-sm">{metric.title}</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <Input
-                    value={metrics[metric.key as keyof typeof metrics]}
-                    onChange={(e) => setMetrics({
-                      ...metrics,
-                      [metric.key]: e.target.value
-                    })}
+                    value={metric.value}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      setMetricsData(prev => 
+                        prev.map(m => m.id === metric.id ? {...m, value: newValue} : m)
+                      );
+                    }}
+                    onBlur={(e) => handleSave(metric, e.target.value)}
                     className="text-2xl font-bold text-center"
                   />
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Additional Settings */}
         <Card className="mt-8">

@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Bell, Calendar, Camera, Menu, TrendingUp, X } from "lucide-react";
+import { Calendar, Camera, Menu, TrendingUp, X, Award } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
+import NotificationDropdown from "./NotificationDropdown";
 
 const Header = () => {
   const location = useLocation();
@@ -13,7 +14,7 @@ const Header = () => {
     { path: "/", label: "Dashboard", icon: TrendingUp },
     { path: "/calendar", label: "Calendário", icon: Calendar },
     { path: "/gallery", label: "Galeria", icon: Camera },
-    { path: "/sponsors", label: "Patrocinadores", icon: Bell },
+    { path: "/sponsors", label: "Patrocinadores", icon: Award },
   ];
 
   return (
@@ -52,12 +53,7 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full text-xs flex items-center justify-center text-white">
-                4
-              </span>
-            </Button>
+            <NotificationDropdown />
             <Button 
               variant="ghost" 
               size="icon" 
