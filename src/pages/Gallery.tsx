@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -11,7 +12,8 @@ import {
   Share, 
   Filter,
   Grid3X3,
-  List
+  List,
+  X
 } from "lucide-react";
 
 interface GalleryItem {
@@ -62,6 +64,23 @@ const Gallery = () => {
         return "bg-accent/20 text-accent border-accent/30";
       default:
         return "bg-primary/20 text-primary border-primary/30";
+    }
+  };
+
+  const handleDownload = async (imageUrl: string, title: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${title}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading image:', error);
     }
   };
 
@@ -165,57 +184,106 @@ const Gallery = () => {
           {mediaItems.map((item) => {
             const TypeIcon = getTypeIcon(item.type);
             return (
-              <Card key={item.id} className="overflow-hidden hover-lift">
-                <div className="relative">
-                  <img
-                    src={item.image_url}
-                    alt={item.title}
-                    className="w-full h-48 object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = '/placeholder.svg';
-                    }}
-                  />
-                  <div className="absolute top-2 left-2">
-                    <Badge
-                      variant="outline"
-                      className={`${getTypeColor(item.type)} backdrop-blur-sm`}
-                    >
-                      <TypeIcon className="w-3 h-3 mr-1" />
-                      {item.type === 'video' ? 'Vídeo' : 'Foto'}
-                    </Badge>
-                  </div>
-                  <div className="absolute top-2 right-2">
-                    <Button variant="secondary" size="icon" className="w-8 h-8">
-                      <Download className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-                
-                <CardContent className="p-4 space-y-3">
-                  <div>
-                    <h3 className="font-semibold text-sm mb-1">{item.title}</h3>
-                    {item.description && (
-                      <p className="text-xs text-muted-foreground">{item.description}</p>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">
-                      {new Date(item.created_at).toLocaleDateString('pt-PT')}
-                    </span>
+              <Dialog key={item.id}>
+                <Card className="overflow-hidden hover-lift">
+                  <div className="relative">
+                    <DialogTrigger asChild>
+                      <img
+                        src={item.image_url}
+                        alt={item.title}
+                        className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder.svg';
+                        }}
+                      />
+                    </DialogTrigger>
+                    <div className="absolute top-2 left-2">
+                      <Badge
+                        variant="outline"
+                        className={`${getTypeColor(item.type)} backdrop-blur-sm`}
+                      >
+                        <TypeIcon className="w-3 h-3 mr-1" />
+                        {item.type === 'video' ? 'Vídeo' : 'Foto'}
+                      </Badge>
+                    </div>
+                    <div className="absolute top-2 right-2">
+                      <Button 
+                        variant="secondary" 
+                        size="icon" 
+                        className="w-8 h-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownload(item.image_url, item.title);
+                        }}
+                      >
+                        <Download className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
                   
-                  <div className="flex space-x-2 pt-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Download className="w-3 h-3" />
-                      Download
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <Share className="w-3 h-3" />
-                    </Button>
+                  <CardContent className="p-4 space-y-3">
+                    <div>
+                      <h3 className="font-semibold text-sm mb-1">{item.title}</h3>
+                      {item.description && (
+                        <p className="text-xs text-muted-foreground">{item.description}</p>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">
+                        {new Date(item.created_at).toLocaleDateString('pt-PT')}
+                      </span>
+                    </div>
+                    
+                    <div className="flex space-x-2 pt-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleDownload(item.image_url, item.title)}
+                      >
+                        <Download className="w-3 h-3" />
+                        Download
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Share className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+                  <div className="relative">
+                    <img
+                      src={item.image_url}
+                      alt={item.title}
+                      className="w-full h-auto max-h-[85vh] object-contain"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white p-4">
+                      <h3 className="font-semibold mb-1">{item.title}</h3>
+                      {item.description && (
+                        <p className="text-sm opacity-90">{item.description}</p>
+                      )}
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-sm opacity-75">
+                          {new Date(item.created_at).toLocaleDateString('pt-PT')}
+                        </span>
+                        <Button 
+                          variant="secondary" 
+                          size="sm"
+                          onClick={() => handleDownload(item.image_url, item.title)}
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                </DialogContent>
+              </Dialog>
             );
           })}
         </div>
