@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Camera, Menu, TrendingUp, X, Award } from "lucide-react";
+import { Calendar, Camera, Menu, TrendingUp, X, Award, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import NotificationDropdown from "./NotificationDropdown";
@@ -14,6 +14,7 @@ const Header = () => {
     { path: "/", label: "Dashboard", icon: TrendingUp },
     { path: "/calendar", label: "Calendário", icon: Calendar },
     { path: "/gallery", label: "Galeria", icon: Camera },
+    { path: "/pilots", label: "Pilotos", icon: Users },
     { path: "/sponsors", label: "Patrocinadores", icon: Award },
   ];
 

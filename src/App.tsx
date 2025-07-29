@@ -7,12 +7,14 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Calendar from "./pages/Calendar";
 import Gallery from "./pages/Gallery";
+import Pilots from "./pages/Pilots";
 import Sponsors from "./pages/Sponsors";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import AdminCalendar from "./pages/AdminCalendar";
 import AdminGallery from "./pages/AdminGallery";
 import AdminMetrics from "./pages/AdminMetrics";
+import AdminPilots from "./pages/AdminPilots";
 import AdminSponsors from "./pages/AdminSponsors";
 import AdminPressReleases from "./pages/AdminPressReleases";
 import NotFound from "./pages/NotFound";
@@ -30,12 +32,14 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/gallery" element={<Gallery />} />
+            <Route path="/pilots" element={<Pilots />} />
             <Route path="/sponsors" element={<Sponsors />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/calendar" element={<AdminCalendar />} />
             <Route path="/admin/gallery" element={<AdminGallery />} />
             <Route path="/admin/metrics" element={<AdminMetrics />} />
+            <Route path="/admin/pilots" element={<AdminPilots />} />
             <Route path="/admin/sponsors" element={<AdminSponsors />} />
             <Route path="/admin/press-releases" element={<AdminPressReleases />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

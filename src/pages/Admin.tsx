@@ -8,7 +8,8 @@ import {
   ImageIcon, 
   LogOut,
   Settings,
-  Award
+  Award,
+  Users
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -39,6 +40,13 @@ const Admin = () => {
       description: "Upload de imagens e vídeos",
       icon: ImageIcon,
       path: "/admin/gallery",
+      color: "text-accent"
+    },
+    {
+      title: "Pilotos",
+      description: "Gerir pilotos e equipas",
+      icon: Users,
+      path: "/admin/pilots",
       color: "text-accent"
     },
     {

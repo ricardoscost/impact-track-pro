@@ -241,6 +241,72 @@ export type Database = {
         }
         Relationships: []
       }
+      pilots: {
+        Row: {
+          biography: string | null
+          birth_date: string | null
+          championships: number | null
+          created_at: string
+          facebook: string | null
+          id: string
+          instagram: string | null
+          is_active: boolean
+          linkedin: string | null
+          name: string
+          nationality: string | null
+          photo_url: string | null
+          podiums: number | null
+          sort_order: number | null
+          team: string | null
+          twitter: string | null
+          updated_at: string
+          victories: number | null
+          website: string | null
+        }
+        Insert: {
+          biography?: string | null
+          birth_date?: string | null
+          championships?: number | null
+          created_at?: string
+          facebook?: string | null
+          id?: string
+          instagram?: string | null
+          is_active?: boolean
+          linkedin?: string | null
+          name: string
+          nationality?: string | null
+          photo_url?: string | null
+          podiums?: number | null
+          sort_order?: number | null
+          team?: string | null
+          twitter?: string | null
+          updated_at?: string
+          victories?: number | null
+          website?: string | null
+        }
+        Update: {
+          biography?: string | null
+          birth_date?: string | null
+          championships?: number | null
+          created_at?: string
+          facebook?: string | null
+          id?: string
+          instagram?: string | null
+          is_active?: boolean
+          linkedin?: string | null
+          name?: string
+          nationality?: string | null
+          photo_url?: string | null
+          podiums?: number | null
+          sort_order?: number | null
+          team?: string | null
+          twitter?: string | null
+          updated_at?: string
+          victories?: number | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       press_releases: {
         Row: {
           content: string | null
