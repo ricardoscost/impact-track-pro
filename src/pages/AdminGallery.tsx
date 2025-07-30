@@ -22,12 +22,14 @@ const AdminGallery = () => {
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [mediaItems, setMediaItems] = useState<any[]>([]);
+  const [pilots, setPilots] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     title: '',
     type: 'photo',
     event: '',
+    pilot_id: '',
     image_url: '',
     description: ''
   });
@@ -57,8 +59,24 @@ const AdminGallery = () => {
     }
   };
 
+  const fetchPilots = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('pilots')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setPilots(data || []);
+    } catch (error) {
+      console.error('Error fetching pilots:', error);
+    }
+  };
+
   useEffect(() => {
     fetchGalleryItems();
+    fetchPilots();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,7 +90,10 @@ const AdminGallery = () => {
             type: formData.type,
             image_url: formData.image_url,
             description: formData.description,
-            tags: formData.event ? [formData.event] : []
+            tags: [
+              ...(formData.event ? [formData.event] : []),
+              ...(formData.pilot_id ? [formData.pilot_id] : [])
+            ].filter(Boolean)
           }
         ])
         .select();
@@ -96,6 +117,7 @@ const AdminGallery = () => {
         title: '',
         type: 'photo',
         event: '',
+        pilot_id: '',
         image_url: '',
         description: ''
       });
@@ -219,6 +241,23 @@ const AdminGallery = () => {
                     value={formData.event}
                     onChange={(e) => setFormData({...formData, event: e.target.value})}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="pilot_id">Associar a Piloto (opcional)</Label>
+                  <select
+                    id="pilot_id"
+                    value={formData.pilot_id}
+                    onChange={(e) => setFormData({...formData, pilot_id: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-md"
+                  >
+                    <option value="">Selecionar piloto...</option>
+                    {pilots.map((pilot) => (
+                      <option key={pilot.id} value={pilot.id}>
+                        {pilot.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 
                 <div className="space-y-2">

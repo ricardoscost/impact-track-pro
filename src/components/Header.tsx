@@ -13,8 +13,8 @@ const Header = () => {
   const navItems = [
     { path: "/", label: "Dashboard", icon: TrendingUp },
     { path: "/calendar", label: "Calendário", icon: Calendar },
-    { path: "/gallery", label: "Galeria", icon: Camera },
     { path: "/pilots", label: "Pilotos", icon: Users },
+    { path: "/gallery", label: "Galeria", icon: Camera },
     { path: "/sponsors", label: "Patrocinadores", icon: Award },
   ];
 

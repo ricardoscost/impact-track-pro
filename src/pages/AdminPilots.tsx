@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Save, X, Trophy, Award, Medal, Globe, Instagram, Facebook, Twitter, Linkedin } from "lucide-react";
+import { Plus, Edit, Trash2, Save, X, Trophy, Award, Medal, Globe, Instagram, Facebook, Twitter, Linkedin, ArrowLeft } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +30,8 @@ interface Pilot {
   birth_date: string | null;
   nationality: string | null;
   team: string | null;
+  bike_make: string | null;
+  bike_model: string | null;
   championships: number;
   victories: number;
   podiums: number;
@@ -48,6 +51,8 @@ interface PilotFormData {
   birth_date: string;
   nationality: string;
   team: string;
+  bike_make: string;
+  bike_model: string;
   championships: number;
   victories: number;
   podiums: number;
@@ -72,6 +77,8 @@ const AdminPilots = () => {
     birth_date: "",
     nationality: "",
     team: "",
+    bike_make: "",
+    bike_model: "",
     championships: 0,
     victories: 0,
     podiums: 0,
@@ -196,6 +203,8 @@ const AdminPilots = () => {
       birth_date: pilot.birth_date || "",
       nationality: pilot.nationality || "",
       team: pilot.team || "",
+      bike_make: pilot.bike_make || "",
+      bike_model: pilot.bike_model || "",
       championships: pilot.championships,
       victories: pilot.victories,
       podiums: pilot.podiums,
@@ -222,6 +231,8 @@ const AdminPilots = () => {
       birth_date: "",
       nationality: "",
       team: "",
+      bike_make: "",
+      bike_model: "",
       championships: 0,
       victories: 0,
       podiums: 0,
@@ -240,7 +251,14 @@ const AdminPilots = () => {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Gestão de Pilotos</h1>
+        <div className="flex items-center space-x-4">
+          <Link to="/admin">
+            <Button variant="outline" size="icon">
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-bold">Gestão de Pilotos</h1>
+        </div>
         <Button onClick={() => setIsFormOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Adicionar Piloto
@@ -312,6 +330,26 @@ const AdminPilots = () => {
                     type="number"
                     value={formData.sort_order}
                     onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bike_make">Marca da Mota</Label>
+                  <Input
+                    id="bike_make"
+                    value={formData.bike_make}
+                    onChange={(e) => setFormData({ ...formData, bike_make: e.target.value })}
+                    placeholder="Ex: KTM, Honda, Yamaha..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bike_model">Modelo da Mota</Label>
+                  <Input
+                    id="bike_model"
+                    value={formData.bike_model}
+                    onChange={(e) => setFormData({ ...formData, bike_model: e.target.value })}
+                    placeholder="Ex: 250 EXC-F, CRF 250RX..."
                   />
                 </div>
               </div>

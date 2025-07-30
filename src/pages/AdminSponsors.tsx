@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ import {
   Linkedin,
   Twitter,
   Save,
+  ArrowLeft,
   X
 } from "lucide-react";
 
@@ -174,7 +176,14 @@ const AdminSponsors = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Gestão de Patrocinadores</h1>
+        <div className="flex items-center space-x-4">
+          <Link to="/admin">
+            <Button variant="outline" size="icon">
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-bold">Gestão de Patrocinadores</h1>
+        </div>
         <Button onClick={() => setIsEditing(true)}>
           <Plus className="w-4 h-4" />
           Novo Patrocinador

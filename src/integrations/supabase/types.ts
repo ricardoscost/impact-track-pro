@@ -243,6 +243,8 @@ export type Database = {
       }
       pilots: {
         Row: {
+          bike_make: string | null
+          bike_model: string | null
           biography: string | null
           birth_date: string | null
           championships: number | null
@@ -264,6 +266,8 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          bike_make?: string | null
+          bike_model?: string | null
           biography?: string | null
           birth_date?: string | null
           championships?: number | null
@@ -285,6 +289,8 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          bike_make?: string | null
+          bike_model?: string | null
           biography?: string | null
           birth_date?: string | null
           championships?: number | null

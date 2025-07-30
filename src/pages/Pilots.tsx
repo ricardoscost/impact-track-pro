@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import Header from "@/components/Header";
+import PilotDetailDialog from "@/components/PilotDetailDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trophy, Award, Medal, Globe, Instagram, Facebook, Twitter, Linkedin, Calendar } from "lucide-react";
+import { Trophy, Award, Medal, Globe, Instagram, Facebook, Twitter, Linkedin, Calendar, Bike } from "lucide-react";
 
 interface Pilot {
   id: string;
@@ -14,6 +16,8 @@ interface Pilot {
   birth_date: string | null;
   nationality: string | null;
   team: string | null;
+  bike_make: string | null;
+  bike_model: string | null;
   championships: number;
   victories: number;
   podiums: number;
@@ -27,6 +31,9 @@ interface Pilot {
 }
 
 const Pilots = () => {
+  const [selectedPilot, setSelectedPilot] = useState<Pilot | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   const { data: pilots, isLoading } = useQuery({
     queryKey: ["pilots"],
     queryFn: async () => {
@@ -94,7 +101,14 @@ const Pilots = () => {
         {pilots && pilots.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {pilots.map((pilot) => (
-              <Card key={pilot.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <Card 
+                key={pilot.id} 
+                className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => {
+                  setSelectedPilot(pilot);
+                  setDialogOpen(true);
+                }}
+              >
                 <CardContent className="p-6">
                   <div className="text-center mb-6">
                     {pilot.photo_url ? (
@@ -127,6 +141,19 @@ const Pilots = () => {
                         </Badge>
                       )}
                     </div>
+
+                    {/* Bike Info */}
+                    {(pilot.bike_make || pilot.bike_model) && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Bike className="w-4 h-4" />
+                        <span>
+                          {pilot.bike_make && pilot.bike_model 
+                            ? `${pilot.bike_make} ${pilot.bike_model}`
+                            : pilot.bike_make || pilot.bike_model
+                          }
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {pilot.biography && (
@@ -203,6 +230,12 @@ const Pilots = () => {
             </p>
           </div>
         )}
+
+        <PilotDetailDialog 
+          pilot={selectedPilot}
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+        />
       </main>
     </div>
   );
