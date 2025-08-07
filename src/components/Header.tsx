@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Camera, Menu, TrendingUp, X, Award, Users } from "lucide-react";
+import { Calendar, Camera, Menu, TrendingUp, X, Award, Users, Trophy } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import NotificationDropdown from "./NotificationDropdown";
@@ -15,6 +15,7 @@ const Header = () => {
     { path: "/calendar", label: "Calendário", icon: Calendar },
     { path: "/pilots", label: "Pilotos", icon: Users },
     { path: "/gallery", label: "Galeria", icon: Camera },
+    { path: "/results", label: "Resultados", icon: Trophy },
     { path: "/sponsors", label: "Patrocinadores", icon: Award },
   ];
 
@@ -28,8 +29,8 @@ const Header = () => {
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Enduro Sponsor</h1>
-              <p className="text-xs text-muted-foreground">Plataforma de Patrocínios</p>
+              <h1 className="text-xl font-bold text-foreground">Macominho Racing</h1>
+              <p className="text-xs text-muted-foreground">Paixão e Adrenalina em Cada Curva</p>
             </div>
           </div>
 

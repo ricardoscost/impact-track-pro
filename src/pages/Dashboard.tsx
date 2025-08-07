@@ -1,6 +1,7 @@
 import NextEventBanner from "@/components/NextEventBanner";
 import PressReleaseCard from "@/components/PressReleaseCard";
 import LatestGallery from "@/components/LatestGallery";
+import LatestYouTubeVideos from "@/components/LatestYouTubeVideos";
 import SponsorCarousel from "@/components/SponsorCarousel";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -136,6 +137,9 @@ const Dashboard = () => {
           <LatestGallery />
         </div>
       </div>
+
+      {/* Últimos Vídeos do YouTube */}
+      <LatestYouTubeVideos />
 
       {/* Métricas */}
       {loading ? (

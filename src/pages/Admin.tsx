@@ -9,7 +9,9 @@ import {
   LogOut,
   Settings,
   Award,
-  Users
+  Users,
+  Play,
+  Trophy
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -62,6 +64,20 @@ const Admin = () => {
       icon: Settings,
       path: "/admin/press-releases",
       color: "text-primary"
+    },
+    {
+      title: "Vídeos YouTube",
+      description: "Gerir vídeos do YouTube",
+      icon: Play,
+      path: "/admin/youtube-videos",
+      color: "text-red-500"
+    },
+    {
+      title: "Resultados",
+      description: "Gerir resultados de eventos",
+      icon: Trophy,
+      path: "/admin/results",
+      color: "text-yellow-500"
     }
   ];
 
@@ -73,7 +89,7 @@ const Admin = () => {
           <div>
             <h1 className="text-3xl font-bold">Administração</h1>
             <p className="text-muted-foreground">
-              Painel de controlo do Enduro Sponsor App
+              Painel de controlo da Macominho Racing
             </p>
           </div>
           <Button variant="outline" onClick={logout}>

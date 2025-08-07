@@ -9,6 +9,7 @@ import Calendar from "./pages/Calendar";
 import Gallery from "./pages/Gallery";
 import Pilots from "./pages/Pilots";
 import Sponsors from "./pages/Sponsors";
+import Results from "./pages/Results";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import AdminCalendar from "./pages/AdminCalendar";
@@ -17,6 +18,8 @@ import AdminMetrics from "./pages/AdminMetrics";
 import AdminPilots from "./pages/AdminPilots";
 import AdminSponsors from "./pages/AdminSponsors";
 import AdminPressReleases from "./pages/AdminPressReleases";
+import AdminYouTubeVideos from "./pages/AdminYouTubeVideos";
+import AdminResults from "./pages/AdminResults";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +37,7 @@ const App = () => (
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/pilots" element={<Pilots />} />
             <Route path="/sponsors" element={<Sponsors />} />
+            <Route path="/results" element={<Results />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/calendar" element={<AdminCalendar />} />
@@ -42,6 +46,8 @@ const App = () => (
             <Route path="/admin/pilots" element={<AdminPilots />} />
             <Route path="/admin/sponsors" element={<AdminSponsors />} />
             <Route path="/admin/press-releases" element={<AdminPressReleases />} />
+            <Route path="/admin/youtube-videos" element={<AdminYouTubeVideos />} />
+            <Route path="/admin/results" element={<AdminResults />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
