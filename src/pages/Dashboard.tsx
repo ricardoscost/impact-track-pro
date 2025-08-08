@@ -1,4 +1,5 @@
 import NextEventBanner from "@/components/NextEventBanner";
+import LatestResultBanner from "@/components/LatestResultBanner";
 import PressReleaseCard from "@/components/PressReleaseCard";
 import LatestGallery from "@/components/LatestGallery";
 import LatestYouTubeVideos from "@/components/LatestYouTubeVideos";
@@ -122,8 +123,14 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* Banner do Último Resultado */}
+      <LatestResultBanner />
+
       {/* Carrossel de Patrocinadores */}
       <SponsorCarousel />
+
+      {/* Últimos Vídeos do YouTube */}
+      <LatestYouTubeVideos />
 
       {/* Secções Secundárias */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -137,9 +144,6 @@ const Dashboard = () => {
           <LatestGallery />
         </div>
       </div>
-
-      {/* Últimos Vídeos do YouTube */}
-      <LatestYouTubeVideos />
 
       {/* Métricas */}
       {loading ? (
