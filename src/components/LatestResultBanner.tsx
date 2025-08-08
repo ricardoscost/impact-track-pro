@@ -71,34 +71,34 @@ const LatestResultBanner = () => {
 
   return (
     <Card className="bg-card border border-primary/20 shadow-elegant overflow-hidden">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-              <Trophy className="w-8 h-8 text-primary-foreground" />
+      <CardContent className="p-3 md:p-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+              <Trophy className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground" />
             </div>
-            <div>
-              <h3 className="text-lg font-bold mb-1 text-card-foreground">🏁 Último Resultado</h3>
-              <div className="flex items-center gap-2 mb-2">
-                <User className="w-4 h-4 text-muted-foreground" />
-                <span className="font-semibold text-lg text-card-foreground">{latestResult.pilot_name} - {latestResult.position}º lugar</span>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-sm md:text-base font-bold mb-1 text-card-foreground">🏁 Último Resultado</h3>
+              <div className="flex items-center gap-2 mb-1">
+                <User className="w-3 h-3 md:w-4 md:h-4 text-muted-foreground flex-shrink-0" />
+                <span className="font-semibold text-sm md:text-base text-card-foreground truncate">{latestResult.pilot_name} - {latestResult.position}º lugar</span>
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-xs md:text-sm text-muted-foreground">
                 {latestResult.category && `Categoria: ${latestResult.category}`}
                 {latestResult.time_result && ` • Tempo: ${latestResult.time_result}`}
               </div>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-xl font-bold mb-1 text-card-foreground">{latestResult.event.title}</div>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="text-left md:text-right flex-shrink-0">
+            <div className="text-sm md:text-lg font-bold mb-1 text-card-foreground">{latestResult.event.title}</div>
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-xs md:text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                {format(new Date(latestResult.event.date), "dd/MM/yyyy", { locale: ptBR })}
+                <Calendar className="w-3 h-3 flex-shrink-0" />
+                <span>{format(new Date(latestResult.event.date), "dd/MM/yyyy", { locale: ptBR })}</span>
               </div>
               <div className="flex items-center gap-1">
-                <MapPin className="w-3 h-3" />
-                {latestResult.event.location}
+                <MapPin className="w-3 h-3 flex-shrink-0" />
+                <span className="truncate">{latestResult.event.location}</span>
               </div>
             </div>
           </div>
