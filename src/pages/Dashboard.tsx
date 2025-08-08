@@ -126,24 +126,14 @@ const Dashboard = () => {
       {/* Banner do Último Resultado */}
       <LatestResultBanner />
 
-      {/* Carrossel de Patrocinadores */}
-      <SponsorCarousel />
+      {/* Últimas Fotografias */}
+      <LatestGallery />
 
       {/* Últimos Vídeos do YouTube */}
       <LatestYouTubeVideos />
 
-      {/* Secções Secundárias */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Press Releases */}
-        <div>
-          <PressReleaseCard pressReleases={formatPressReleases(pressReleases)} />
-        </div>
-
-        {/* Últimas Fotografias */}
-        <div>
-          <LatestGallery />
-        </div>
-      </div>
+      {/* Últimos Press Releases */}
+      <PressReleaseCard pressReleases={formatPressReleases(pressReleases)} />
 
       {/* Métricas */}
       {loading ? (
