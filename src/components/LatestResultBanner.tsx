@@ -70,28 +70,28 @@ const LatestResultBanner = () => {
   }
 
   return (
-    <Card className="bg-gradient-primary border-none text-white shadow-elegant">
+    <Card className="bg-card border border-primary/20 shadow-elegant overflow-hidden">
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-              <Trophy className="w-8 h-8 text-yellow-300" />
+            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
+              <Trophy className="w-8 h-8 text-primary-foreground" />
             </div>
             <div>
-              <h3 className="text-lg font-bold mb-1">🏁 Último Resultado</h3>
+              <h3 className="text-lg font-bold mb-1 text-card-foreground">🏁 Último Resultado</h3>
               <div className="flex items-center gap-2 mb-2">
-                <User className="w-4 h-4" />
-                <span className="font-semibold text-lg">{latestResult.pilot_name} - {latestResult.position}º lugar</span>
+                <User className="w-4 h-4 text-muted-foreground" />
+                <span className="font-semibold text-lg text-card-foreground">{latestResult.pilot_name} - {latestResult.position}º lugar</span>
               </div>
-              <div className="text-sm text-white/80">
+              <div className="text-sm text-muted-foreground">
                 {latestResult.category && `Categoria: ${latestResult.category}`}
                 {latestResult.time_result && ` • Tempo: ${latestResult.time_result}`}
               </div>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-xl font-bold mb-1">{latestResult.event.title}</div>
-            <div className="flex items-center gap-4 text-sm text-white/80">
+            <div className="text-xl font-bold mb-1 text-card-foreground">{latestResult.event.title}</div>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 {format(new Date(latestResult.event.date), "dd/MM/yyyy", { locale: ptBR })}
