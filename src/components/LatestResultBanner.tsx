@@ -45,7 +45,7 @@ const LatestResultBanner = () => {
           )
         `)
         .eq('is_active', true)
-        .eq('position', 1) // Apenas vencedores
+        // Buscar qualquer resultado recente (removido filtro de posição para teste)
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
@@ -78,10 +78,10 @@ const LatestResultBanner = () => {
               <Trophy className="w-8 h-8 text-yellow-300" />
             </div>
             <div>
-              <h3 className="text-lg font-bold mb-1">🏆 Último Vencedor</h3>
+              <h3 className="text-lg font-bold mb-1">🏁 Último Resultado</h3>
               <div className="flex items-center gap-2 mb-2">
                 <User className="w-4 h-4" />
-                <span className="font-semibold text-lg">{latestResult.pilot_name}</span>
+                <span className="font-semibold text-lg">{latestResult.pilot_name} - {latestResult.position}º lugar</span>
               </div>
               <div className="text-sm text-white/80">
                 {latestResult.category && `Categoria: ${latestResult.category}`}

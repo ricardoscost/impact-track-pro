@@ -68,7 +68,10 @@ const Results = () => {
         if (!acc[eventId]) {
           acc[eventId] = [];
         }
-        acc[eventId].push(result);
+        acc[eventId].push({
+          ...result,
+          event: result.events // Fix: map events to event property
+        });
         return acc;
       }, {} as { [eventId: string]: Result[] });
 
