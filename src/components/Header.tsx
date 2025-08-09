@@ -34,7 +34,7 @@ const Header = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-chrome">Hard Enduro Social Club</h1>
-              <p className="text-xs text-muted-foreground">Paixão e Adrenalina em Cada Curva</p>
+              <p className="text-xs text-muted-foreground">Hard Trails. Good Vibes.</p>
             </div>
           </div>
 
