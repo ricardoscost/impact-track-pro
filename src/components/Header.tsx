@@ -25,11 +25,11 @@ const Header = () => {
         <div className="flex items-center justify-between">
           {/* Logo/Brand */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 gradient-chrome rounded-lg flex items-center justify-center shadow-chrome">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Macominho Racing</h1>
+              <h1 className="text-xl font-bold text-chrome">Macominho Racing</h1>
               <p className="text-xs text-muted-foreground">Paixão e Adrenalina em Cada Curva</p>
             </div>
           </div>
