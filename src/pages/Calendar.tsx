@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -16,6 +17,7 @@ import {
 const Calendar = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
   useEffect(() => {
     fetchEvents();
@@ -145,57 +147,99 @@ const Calendar = () => {
               </div>
             ) : (
             events.map((event) => (
-              <div
-                key={event.id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-smooth"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">
-                      {new Date(event.date).getDate()}
+              <Dialog key={event.id}>
+                <DialogTrigger asChild>
+                  <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 hover:border-accent/50 transition-smooth cursor-pointer group">
+                    <div className="flex items-center space-x-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-accent group-hover:text-accent">
+                          {new Date(event.date).getDate()}
+                        </div>
+                        <div className="text-xs text-muted-foreground uppercase">
+                          {new Date(event.date).toLocaleDateString('pt-PT', { month: 'short' })}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <h3 className="font-semibold group-hover:text-accent transition-smooth">{event.title}</h3>
+                        <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                          <MapPin className="w-3 h-3" />
+                          <span>{event.location}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground uppercase">
-                      {new Date(event.date).toLocaleDateString('pt-PT', { month: 'short' })}
+                    
+                    <div className="flex items-center space-x-2">
+                      <Badge
+                        variant="outline"
+                        className="bg-accent/10 text-accent border-accent/30"
+                      >
+                        {event.type}
+                      </Badge>
                     </div>
                   </div>
-                  
-                  <div className="space-y-1">
-                    <h3 className="font-semibold">{event.title}</h3>
-                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                      <div className="flex items-center space-x-1">
-                        <Clock className="w-3 h-3" />
-                        <span>{event.time}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <MapPin className="w-3 h-3" />
-                        <span>{event.location}</span>
-                      </div>
-                       <div className="flex items-center space-x-1">
-                         <Users className="w-3 h-3" />
-                         <span>{event.participants} participantes</span>
-                       </div>
-                    </div>
-                  </div>
-                </div>
+                </DialogTrigger>
                 
-                <div className="flex items-center space-x-2">
-                  <Badge
-                    variant="outline"
-                    className={getTypeColor(event.type)}
-                  >
-                    {event.type}
-                  </Badge>
-                  <Badge
-                    variant="outline"
-                    className={getStatusColor(event.status)}
-                  >
-                    {event.status}
-                  </Badge>
-                   <div className="text-xs text-muted-foreground">
-                     {event.sponsors} patrocinadores
-                   </div>
-                </div>
-               </div>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl">{event.title}</DialogTitle>
+                  </DialogHeader>
+                  
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <CalendarIcon className="w-4 h-4 text-accent" />
+                          <span className="font-medium">Data:</span>
+                          <span>{new Date(event.date).toLocaleDateString('pt-PT')}</span>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Clock className="w-4 h-4 text-accent" />
+                          <span className="font-medium">Hora:</span>
+                          <span>{event.time}</span>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4 text-accent" />
+                          <span className="font-medium">Local:</span>
+                          <span>{event.location}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <Users className="w-4 h-4 text-accent" />
+                          <span className="font-medium">Participantes:</span>
+                          <span>{event.participants}</span>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium">Patrocinadores:</span>
+                          <span>{event.sponsors}</span>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium">Estado:</span>
+                          <Badge
+                            variant="outline"
+                            className={getStatusColor(event.status)}
+                          >
+                            {event.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {event.description && (
+                      <div>
+                        <h4 className="font-medium mb-2">Descrição:</h4>
+                        <p className="text-muted-foreground">{event.description}</p>
+                      </div>
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
              ))
             )}
            </div>
