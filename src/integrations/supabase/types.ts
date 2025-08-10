@@ -785,6 +785,7 @@ export type Database = {
           id: string
           is_active: boolean
           observations: string | null
+          pilot_id: string | null
           pilot_name: string
           points: number | null
           position: number
@@ -799,6 +800,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           observations?: string | null
+          pilot_id?: string | null
           pilot_name: string
           points?: number | null
           position: number
@@ -813,6 +815,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           observations?: string | null
+          pilot_id?: string | null
           pilot_name?: string
           points?: number | null
           position?: number
@@ -825,6 +828,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "results_pilot_id_fkey"
+            columns: ["pilot_id"]
+            isOneToOne: false
+            referencedRelation: "pilots"
             referencedColumns: ["id"]
           },
         ]

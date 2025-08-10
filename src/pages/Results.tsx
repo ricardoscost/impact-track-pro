@@ -19,6 +19,7 @@ interface Event {
 interface Result {
   id: string;
   event_id: string;
+  pilot_id: string | null;
   pilot_name: string;
   position: number;
   points: number;
@@ -27,6 +28,11 @@ interface Result {
   bike_info: string | null;
   observations: string | null;
   event?: Event;
+  pilots?: {
+    id: string;
+    name: string;
+    photo_url: string | null;
+  };
 }
 
 const Results = () => {
@@ -51,6 +57,11 @@ const Results = () => {
             location,
             type,
             status
+          ),
+          pilots (
+            id,
+            name,
+            photo_url
           )
         `)
         .eq('is_active', true)
@@ -184,6 +195,13 @@ const Results = () => {
                             {getPositionIcon(result.position)}
                             <span className="ml-1">{result.position}º</span>
                           </div>
+                          {result.pilots?.photo_url && (
+                            <img
+                              src={result.pilots.photo_url}
+                              alt={result.pilot_name}
+                              className="w-10 h-10 rounded-full object-cover border-2 border-primary/20"
+                            />
+                          )}
                           <div>
                             <div className="flex items-center gap-2 mb-1">
                               <User className="w-4 h-4 text-muted-foreground" />

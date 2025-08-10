@@ -18,9 +18,16 @@ interface Event {
   location: string;
 }
 
+interface Pilot {
+  id: string;
+  name: string;
+  photo_url: string | null;
+}
+
 interface Result {
   id: string;
   event_id: string;
+  pilot_id: string | null;
   pilot_name: string;
   position: number;
   points: number;
@@ -34,11 +41,13 @@ interface Result {
 const AdminResults = () => {
   const [results, setResults] = useState<Result[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
+  const [pilots, setPilots] = useState<Pilot[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingResult, setEditingResult] = useState<Result | null>(null);
   const [formData, setFormData] = useState({
     event_id: "",
+    pilot_id: "",
     pilot_name: "",
     position: 1,
     points: 0,
@@ -54,16 +63,19 @@ const AdminResults = () => {
 
   const fetchData = async () => {
     try {
-      const [resultsData, eventsData] = await Promise.all([
+      const [resultsData, eventsData, pilotsData] = await Promise.all([
         supabase.from('results').select('*, events(id, title, date, location)').order('event_id'),
-        supabase.from('events').select('id, title, date, location').order('date', { ascending: false })
+        supabase.from('events').select('id, title, date, location').order('date', { ascending: false }),
+        supabase.from('pilots').select('id, name, photo_url').eq('is_active', true).order('name')
       ]);
 
       if (resultsData.error) throw resultsData.error;
       if (eventsData.error) throw eventsData.error;
+      if (pilotsData.error) throw pilotsData.error;
 
       setResults(resultsData.data || []);
       setEvents(eventsData.data || []);
+      setPilots(pilotsData.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Erro ao carregar dados');
@@ -73,8 +85,8 @@ const AdminResults = () => {
   };
 
   const handleSave = async () => {
-    if (!formData.event_id || !formData.pilot_name.trim()) {
-      toast.error('Evento e nome do piloto são obrigatórios');
+    if (!formData.event_id || (!formData.pilot_id && !formData.pilot_name.trim())) {
+      toast.error('Evento e piloto são obrigatórios');
       return;
     }
 
@@ -101,6 +113,7 @@ const AdminResults = () => {
   const resetForm = () => {
     setFormData({
       event_id: "",
+      pilot_id: "",
       pilot_name: "",
       position: 1,
       points: 0,
@@ -116,6 +129,7 @@ const AdminResults = () => {
     setEditingResult(result);
     setFormData({
       event_id: result.event_id,
+      pilot_id: result.pilot_id || "",
       pilot_name: result.pilot_name,
       position: result.position,
       points: result.points,
@@ -167,8 +181,32 @@ const AdminResults = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label>Nome do Piloto</Label>
-                  <Input value={formData.pilot_name} onChange={(e) => setFormData(prev => ({...prev, pilot_name: e.target.value}))} />
+                  <Label>Piloto</Label>
+                  <Select value={formData.pilot_id} onValueChange={(value) => {
+                    const selectedPilot = pilots.find(p => p.id === value);
+                    setFormData(prev => ({
+                      ...prev, 
+                      pilot_id: value,
+                      pilot_name: selectedPilot?.name || ""
+                    }));
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um piloto" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {pilots.map(pilot => (
+                        <SelectItem key={pilot.id} value={pilot.id}>{pilot.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Nome Personalizado (opcional)</Label>
+                  <Input 
+                    value={formData.pilot_name} 
+                    onChange={(e) => setFormData(prev => ({...prev, pilot_name: e.target.value}))}
+                    placeholder="Apenas se diferente do nome do piloto"
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>

@@ -4,7 +4,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Trophy, Award, Medal, Globe, Instagram, Facebook, Twitter, Linkedin, Calendar, Bike } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Trophy, Award, Medal, Globe, Instagram, Facebook, Twitter, Linkedin, Calendar, Bike, MapPin } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface Pilot {
   id: string;
@@ -45,6 +48,33 @@ const PilotDetailDialog = ({ pilot, open, onOpenChange }: PilotDetailDialogProps
         .select("*")
         .contains("tags", [pilot.id])
         .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!pilot?.id && open,
+  });
+
+  const { data: pilotResults, isLoading: loadingResults } = useQuery({
+    queryKey: ["pilot-results", pilot?.id],
+    queryFn: async () => {
+      if (!pilot?.id) return [];
+      
+      const { data, error } = await supabase
+        .from("results")
+        .select(`
+          *,
+          events (
+            id,
+            title,
+            date,
+            location,
+            type
+          )
+        `)
+        .eq("pilot_id", pilot.id)
+        .eq("is_active", true)
+        .order("events(date)", { ascending: false });
 
       if (error) throw error;
       return data;
@@ -199,34 +229,96 @@ const PilotDetailDialog = ({ pilot, open, onOpenChange }: PilotDetailDialogProps
 
             <Separator />
 
-            {/* Gallery */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Galeria</h3>
-              {loadingGallery ? (
-                <div className="text-center py-4">
-                  <p className="text-muted-foreground">A carregar galeria...</p>
-                </div>
-              ) : galleryItems && galleryItems.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {galleryItems.map((item) => (
-                    <div key={item.id} className="aspect-square rounded-lg overflow-hidden border">
-                      <img
-                        src={item.image_url}
-                        alt={item.title}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
-                        onClick={() => window.open(item.image_url, '_blank')}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">
-                    Nenhuma foto ou vídeo associado ainda.
-                  </p>
-                </div>
-              )}
-            </div>
+            {/* Tabs for Results and Gallery */}
+            <Tabs defaultValue="results" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="results">Resultados</TabsTrigger>
+                <TabsTrigger value="gallery">Galeria</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="results" className="space-y-4">
+                <h3 className="text-lg font-semibold">Resultados</h3>
+                {loadingResults ? (
+                  <div className="text-center py-4">
+                    <p className="text-muted-foreground">A carregar resultados...</p>
+                  </div>
+                ) : pilotResults && pilotResults.length > 0 ? (
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {pilotResults.map((result: any) => (
+                      <div key={result.id} className="p-3 bg-card rounded-lg border">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h4 className="font-medium">{result.events?.title}</h4>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {format(new Date(result.events?.date), "dd/MM/yyyy", { locale: ptBR })}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                {result.events?.location}
+                              </div>
+                            </div>
+                          </div>
+                          <div className={`px-3 py-1 rounded-full text-sm font-bold ${
+                            result.position === 1 ? 'bg-yellow-500 text-white' :
+                            result.position === 2 ? 'bg-gray-400 text-white' :
+                            result.position === 3 ? 'bg-amber-600 text-white' :
+                            'bg-muted text-foreground'
+                          }`}>
+                            {result.position}º
+                          </div>
+                        </div>
+                        {result.time_result && (
+                          <p className="text-sm text-muted-foreground">
+                            Tempo: {result.time_result}
+                          </p>
+                        )}
+                        {result.points > 0 && (
+                          <p className="text-sm text-muted-foreground">
+                            Pontos: {result.points}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">
+                      Nenhum resultado encontrado ainda.
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="gallery" className="space-y-4">
+                <h3 className="text-lg font-semibold">Galeria</h3>
+                {loadingGallery ? (
+                  <div className="text-center py-4">
+                    <p className="text-muted-foreground">A carregar galeria...</p>
+                  </div>
+                ) : galleryItems && galleryItems.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {galleryItems.map((item) => (
+                      <div key={item.id} className="aspect-square rounded-lg overflow-hidden border">
+                        <img
+                          src={item.image_url}
+                          alt={item.title}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+                          onClick={() => window.open(item.image_url, '_blank')}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">
+                      Nenhuma foto ou vídeo associado ainda.
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </DialogContent>
