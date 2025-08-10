@@ -23,27 +23,144 @@ interface GalleryItem {
   image_url: string;
   type: string;
   created_at: string;
+  album?: {
+    id: string;
+    title: string;
+    event?: {
+      id: string;
+      title: string;
+      date: string;
+    };
+  };
+  pilots?: {
+    id: string;
+    name: string;
+    photo_url?: string;
+  }[];
+}
+
+interface Album {
+  id: string;
+  title: string;
+  description?: string;
+  cover_image_url?: string;
+  event?: {
+    id: string;
+    title: string;
+    date: string;
+  };
+  items_count: number;
 }
 
 const Gallery = () => {
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
   const [mediaItems, setMediaItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'albums' | 'grid'>('albums');
 
   useEffect(() => {
-    fetchGalleryItems();
-  }, []);
+    if (viewMode === 'albums') {
+      fetchAlbums();
+    } else {
+      fetchGalleryItems();
+    }
+  }, [viewMode]);
+
+  useEffect(() => {
+    if (selectedAlbum) {
+      fetchAlbumItems(selectedAlbum);
+    }
+  }, [selectedAlbum]);
+
+  const fetchAlbums = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('gallery_albums')
+        .select(`
+          *,
+          event:events(id, title, date),
+          gallery_items(count)
+        `)
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+      
+      if (error) throw error;
+      
+      const albumsWithCount = data?.map(album => ({
+        ...album,
+        items_count: album.gallery_items?.[0]?.count || 0
+      })) || [];
+      
+      setAlbums(albumsWithCount);
+    } catch (error) {
+      console.error('Error fetching albums:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchGalleryItems = async () => {
     try {
       const { data, error } = await supabase
         .from('gallery_items')
-        .select('*')
+        .select(`
+          *,
+          album:gallery_albums(
+            id,
+            title,
+            event:events(id, title, date)
+          ),
+          gallery_item_pilots(
+            pilot:pilots(id, name, photo_url)
+          )
+        `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      setMediaItems(data || []);
+      
+      const itemsWithPilots = data?.map(item => ({
+        ...item,
+        pilots: item.gallery_item_pilots?.map(gip => gip.pilot) || []
+      })) || [];
+      
+      setMediaItems(itemsWithPilots);
     } catch (error) {
       console.error('Error fetching gallery items:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAlbumItems = async (albumId: string) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('gallery_items')
+        .select(`
+          *,
+          album:gallery_albums(
+            id,
+            title,
+            event:events(id, title, date)
+          ),
+          gallery_item_pilots(
+            pilot:pilots(id, name, photo_url)
+          )
+        `)
+        .eq('album_id', albumId)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      const itemsWithPilots = data?.map(item => ({
+        ...item,
+        pilots: item.gallery_item_pilots?.map(gip => gip.pilot) || []
+      })) || [];
+      
+      setMediaItems(itemsWithPilots);
+    } catch (error) {
+      console.error('Error fetching album items:', error);
     } finally {
       setLoading(false);
     }
@@ -91,202 +208,275 @@ const Gallery = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Galeria Multimédia</h1>
+          <h1 className="text-3xl font-bold">
+            {selectedAlbum ? 'Álbum' : 'Galeria Multimédia'}
+          </h1>
           <p className="text-muted-foreground">
-            Conteúdos exclusivos para patrocinadores e imprensa
+            {selectedAlbum 
+              ? 'Fotografias do álbum selecionado'
+              : 'Conteúdos organizados por eventos e álbuns'
+            }
           </p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" size="icon">
+          {selectedAlbum && (
+            <Button variant="outline" onClick={() => {
+              setSelectedAlbum(null);
+              setViewMode('albums');
+            }}>
+              ← Voltar aos Álbuns
+            </Button>
+          )}
+          <Button 
+            variant={viewMode === 'albums' ? 'default' : 'outline'} 
+            onClick={() => setViewMode('albums')}
+          >
             <Grid3X3 className="w-4 h-4" />
+            Álbuns
           </Button>
-          <Button variant="outline" size="icon">
+          <Button 
+            variant={viewMode === 'grid' ? 'default' : 'outline'} 
+            onClick={() => setViewMode('grid')}
+          >
             <List className="w-4 h-4" />
-          </Button>
-          <Button variant="outline">
-            <Filter className="w-4 h-4" />
-            Filtrar
+            Todas as Fotos
           </Button>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Camera className="w-5 h-5 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Fotos</p>
-                <p className="text-xl font-bold">
-                  {mediaItems.filter(item => item.type === 'photo').length}
-                </p>
+      {/* Albums Grid */}
+      {viewMode === 'albums' && !selectedAlbum && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {loading ? (
+              <div className="col-span-full text-center py-12">Carregando álbuns...</div>
+            ) : albums.length === 0 ? (
+              <div className="col-span-full text-center py-12 text-muted-foreground">
+                Nenhum álbum encontrado
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Video className="w-5 h-5 text-accent" />
-              <div>
-                <p className="text-sm text-muted-foreground">Vídeos</p>
-                <p className="text-xl font-bold">
-                  {mediaItems.filter(item => item.type === 'video').length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Download className="w-5 h-5 text-secondary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Total Items</p>
-                <p className="text-xl font-bold">{mediaItems.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Share className="w-5 h-5 text-purple-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Este Mês</p>
-                <p className="text-xl font-bold">
-                  {mediaItems.filter(item => {
-                    const itemDate = new Date(item.created_at);
-                    const now = new Date();
-                    return itemDate.getMonth() === now.getMonth() && 
-                           itemDate.getFullYear() === now.getFullYear();
-                  }).length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Media Grid */}
-      {loading ? (
-        <div className="text-center py-12">Carregando galeria...</div>
-      ) : mediaItems.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          Nenhuma imagem encontrada
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mediaItems.map((item) => {
-            const TypeIcon = getTypeIcon(item.type);
-            return (
-              <Dialog key={item.id}>
-                <Card className="overflow-hidden hover-lift">
-                  <div className="relative">
-                    <DialogTrigger asChild>
-                      <img
-                        src={item.image_url}
-                        alt={item.title}
-                        className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                        onError={(e) => {
-                          e.currentTarget.src = '/placeholder.svg';
-                        }}
-                      />
-                    </DialogTrigger>
-                    <div className="absolute top-2 left-2">
-                      <Badge
-                        variant="outline"
-                        className={`${getTypeColor(item.type)} backdrop-blur-sm`}
-                      >
-                        <TypeIcon className="w-3 h-3 mr-1" />
-                        {item.type === 'video' ? 'Vídeo' : 'Foto'}
-                      </Badge>
-                    </div>
-                    <div className="absolute top-2 right-2">
-                      <Button 
-                        variant="secondary" 
-                        size="icon" 
-                        className="w-8 h-8"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDownload(item.image_url, item.title);
-                        }}
-                      >
-                        <Download className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <CardContent className="p-4 space-y-3">
-                    <div>
-                      <h3 className="font-semibold text-sm mb-1">{item.title}</h3>
-                      {item.description && (
-                        <p className="text-xs text-muted-foreground">{item.description}</p>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">
-                        {new Date(item.created_at).toLocaleDateString('pt-PT')}
-                      </span>
-                    </div>
-                    
-                    <div className="flex space-x-2 pt-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1"
-                        onClick={() => handleDownload(item.image_url, item.title)}
-                      >
-                        <Download className="w-3 h-3" />
-                        Download
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Share className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-                  <div className="relative">
+            ) : (
+              albums.map((album) => (
+                <Card 
+                  key={album.id} 
+                  className="overflow-hidden hover-lift cursor-pointer"
+                  onClick={() => setSelectedAlbum(album.id)}
+                >
+                  <div className="relative h-48">
                     <img
-                      src={item.image_url}
-                      alt={item.title}
-                      className="w-full h-auto max-h-[85vh] object-contain"
-                      onError={(e) => {
-                        e.currentTarget.src = '/placeholder.svg';
-                      }}
+                      src={album.cover_image_url || '/placeholder.svg'}
+                      alt={album.title}
+                      className="w-full h-full object-cover"
                     />
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white p-4">
-                      <h3 className="font-semibold mb-1">{item.title}</h3>
-                      {item.description && (
-                        <p className="text-sm opacity-90">{item.description}</p>
-                      )}
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-sm opacity-75">
-                          {new Date(item.created_at).toLocaleDateString('pt-PT')}
-                        </span>
-                        <Button 
-                          variant="secondary" 
-                          size="sm"
-                          onClick={() => handleDownload(item.image_url, item.title)}
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download
-                        </Button>
+                    <div className="absolute inset-0 bg-black/40 flex items-end p-4">
+                      <div className="text-white">
+                        <h3 className="font-semibold text-lg">{album.title}</h3>
+                        {album.event && (
+                          <p className="text-sm opacity-90">
+                            {album.event.title} • {new Date(album.event.date).toLocaleDateString('pt-PT')}
+                          </p>
+                        )}
+                        <p className="text-xs opacity-75 mt-1">
+                          {album.items_count} {album.items_count === 1 ? 'item' : 'itens'}
+                        </p>
                       </div>
                     </div>
                   </div>
-                </DialogContent>
-              </Dialog>
-            );
-          })}
-        </div>
+                  {album.description && (
+                    <CardContent className="p-4">
+                      <p className="text-sm text-muted-foreground">{album.description}</p>
+                    </CardContent>
+                  )}
+                </Card>
+              ))
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Media Grid */}
+      {(viewMode === 'grid' || selectedAlbum) && (
+        <>
+          {loading ? (
+            <div className="text-center py-12">Carregando galeria...</div>
+          ) : mediaItems.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              Nenhuma imagem encontrada
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mediaItems.map((item) => {
+                const TypeIcon = getTypeIcon(item.type);
+                return (
+                  <Dialog key={item.id}>
+                    <Card className="overflow-hidden hover-lift group">
+                      <div className="relative">
+                        <DialogTrigger asChild>
+                          <img
+                            src={item.image_url}
+                            alt={item.title}
+                            className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                        </DialogTrigger>
+                        
+                        {/* Hover overlay with info */}
+                        <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4">
+                          <div className="text-white text-center space-y-2">
+                            {item.album?.event && (
+                              <div>
+                                <p className="text-sm font-medium">{item.album.event.title}</p>
+                                <p className="text-xs opacity-75">
+                                  {new Date(item.album.event.date).toLocaleDateString('pt-PT')}
+                                </p>
+                              </div>
+                            )}
+                            {item.pilots && item.pilots.length > 0 && (
+                              <div className="flex flex-wrap justify-center gap-1 mt-2">
+                                {item.pilots.map((pilot) => (
+                                  <div key={pilot.id} className="flex items-center space-x-1 bg-black/50 rounded-full px-2 py-1">
+                                    {pilot.photo_url ? (
+                                      <img 
+                                        src={pilot.photo_url} 
+                                        alt={pilot.name}
+                                        className="w-4 h-4 rounded-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="w-4 h-4 rounded-full bg-primary/30" />
+                                    )}
+                                    <span className="text-xs">{pilot.name}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="absolute top-2 left-2">
+                          <Badge
+                            variant="outline"
+                            className={`${getTypeColor(item.type)} backdrop-blur-sm`}
+                          >
+                            <TypeIcon className="w-3 h-3 mr-1" />
+                            {item.type === 'video' ? 'Vídeo' : 'Foto'}
+                          </Badge>
+                        </div>
+                        <div className="absolute top-2 right-2">
+                          <Button 
+                            variant="secondary" 
+                            size="icon" 
+                            className="w-8 h-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownload(item.image_url, item.title);
+                            }}
+                          >
+                            <Download className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <CardContent className="p-4 space-y-3">
+                        <div>
+                          <h3 className="font-semibold text-sm mb-1">{item.title}</h3>
+                          {item.description && (
+                            <p className="text-xs text-muted-foreground">{item.description}</p>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">
+                            {new Date(item.created_at).toLocaleDateString('pt-PT')}
+                          </span>
+                        </div>
+                        
+                        <div className="flex space-x-2 pt-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => handleDownload(item.image_url, item.title)}
+                          >
+                            <Download className="w-3 h-3" />
+                            Download
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Share className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+                      <div className="relative">
+                        <img
+                          src={item.image_url}
+                          alt={item.title}
+                          className="w-full h-auto max-h-[85vh] object-contain"
+                          onError={(e) => {
+                            e.currentTarget.src = '/placeholder.svg';
+                          }}
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white p-4">
+                          <h3 className="font-semibold mb-1">{item.title}</h3>
+                          {item.description && (
+                            <p className="text-sm opacity-90 mb-2">{item.description}</p>
+                          )}
+                          
+                          {item.album?.event && (
+                            <div className="mb-2">
+                              <p className="text-sm font-medium">{item.album.event.title}</p>
+                              <p className="text-xs opacity-75">
+                                {new Date(item.album.event.date).toLocaleDateString('pt-PT')}
+                              </p>
+                            </div>
+                          )}
+                          
+                          {item.pilots && item.pilots.length > 0 && (
+                            <div className="mb-3">
+                              <p className="text-xs opacity-75 mb-1">Pilotos:</p>
+                              <div className="flex flex-wrap gap-2">
+                                {item.pilots.map((pilot) => (
+                                  <div key={pilot.id} className="flex items-center space-x-2 bg-black/50 rounded-full px-3 py-1">
+                                    {pilot.photo_url ? (
+                                      <img 
+                                        src={pilot.photo_url} 
+                                        alt={pilot.name}
+                                        className="w-6 h-6 rounded-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="w-6 h-6 rounded-full bg-primary/30" />
+                                    )}
+                                    <span className="text-sm">{pilot.name}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm opacity-75">
+                              {new Date(item.created_at).toLocaleDateString('pt-PT')}
+                            </span>
+                            <Button 
+                              variant="secondary" 
+                              size="sm"
+                              onClick={() => handleDownload(item.image_url, item.title)}
+                            >
+                              <Download className="w-4 h-4 mr-2" />
+                              Download
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
       </main>
     </div>

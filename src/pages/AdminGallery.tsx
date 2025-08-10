@@ -23,13 +23,14 @@ const AdminGallery = () => {
   const [showForm, setShowForm] = useState(false);
   const [mediaItems, setMediaItems] = useState<any[]>([]);
   const [pilots, setPilots] = useState<any[]>([]);
+  const [albums, setAlbums] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPilots, setSelectedPilots] = useState<string[]>([]);
 
   const [formData, setFormData] = useState({
     title: '',
     type: 'photo',
-    event: '',
-    pilot_id: '',
+    album_id: '',
     image_url: '',
     description: ''
   });
@@ -63,7 +64,7 @@ const AdminGallery = () => {
     try {
       const { data, error } = await supabase
         .from('pilots')
-        .select('id, name')
+        .select('id, name, photo_url')
         .eq('is_active', true)
         .order('name', { ascending: true });
 
@@ -74,9 +75,25 @@ const AdminGallery = () => {
     }
   };
 
+  const fetchAlbums = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('gallery_albums')
+        .select('id, title')
+        .eq('is_active', true)
+        .order('title', { ascending: true });
+
+      if (error) throw error;
+      setAlbums(data || []);
+    } catch (error) {
+      console.error('Error fetching albums:', error);
+    }
+  };
+
   useEffect(() => {
     fetchGalleryItems();
     fetchPilots();
+    fetchAlbums();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,15 +107,26 @@ const AdminGallery = () => {
             type: formData.type,
             image_url: formData.image_url,
             description: formData.description,
-            tags: [
-              ...(formData.event ? [formData.event] : []),
-              ...(formData.pilot_id ? [formData.pilot_id] : [])
-            ].filter(Boolean)
+            album_id: formData.album_id || null
           }
         ])
         .select();
 
       if (error) throw error;
+
+      // Add pilots to gallery item
+      if (selectedPilots.length > 0) {
+        const pilotInserts = selectedPilots.map(pilotId => ({
+          gallery_item_id: data[0].id,
+          pilot_id: pilotId
+        }));
+
+        const { error: pilotError } = await supabase
+          .from('gallery_item_pilots')
+          .insert(pilotInserts);
+
+        if (pilotError) throw pilotError;
+      }
 
       // Create notification
       await supabase
@@ -116,11 +144,11 @@ const AdminGallery = () => {
       setFormData({
         title: '',
         type: 'photo',
-        event: '',
-        pilot_id: '',
+        album_id: '',
         image_url: '',
         description: ''
       });
+      setSelectedPilots([]);
       setShowForm(false);
       
       toast({
@@ -191,16 +219,21 @@ const AdminGallery = () => {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold">Gerir Galeria</h1>
+              <h1 className="text-3xl font-bold">Gerir Fotos/Vídeos</h1>
               <p className="text-muted-foreground">
-                Adicionar fotos e vídeos via links
+                Adicionar fotos e vídeos aos álbuns
               </p>
             </div>
           </div>
-          <Button variant="gradient" onClick={() => setShowForm(!showForm)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Adicionar Media
-          </Button>
+          <div className="flex space-x-2">
+            <Button variant="outline" asChild>
+              <Link to="/admin/gallery-albums">Gerir Álbuns</Link>
+            </Button>
+            <Button variant="gradient" onClick={() => setShowForm(!showForm)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Media
+            </Button>
+          </div>
         </div>
 
         {/* Form */}
@@ -235,29 +268,52 @@ const AdminGallery = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="event">Evento (opcional)</Label>
-                  <Input
-                    id="event"
-                    value={formData.event}
-                    onChange={(e) => setFormData({...formData, event: e.target.value})}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="pilot_id">Associar a Piloto (opcional)</Label>
+                  <Label htmlFor="album_id">Álbum</Label>
                   <select
-                    id="pilot_id"
-                    value={formData.pilot_id}
-                    onChange={(e) => setFormData({...formData, pilot_id: e.target.value})}
+                    id="album_id"
+                    value={formData.album_id}
+                    onChange={(e) => setFormData({...formData, album_id: e.target.value})}
                     className="w-full px-3 py-2 border rounded-md"
                   >
-                    <option value="">Selecionar piloto...</option>
-                    {pilots.map((pilot) => (
-                      <option key={pilot.id} value={pilot.id}>
-                        {pilot.name}
+                    <option value="">Selecionar álbum...</option>
+                    {albums.map((album) => (
+                      <option key={album.id} value={album.id}>
+                        {album.title}
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div className="md:col-span-2 space-y-2">
+                  <Label>Pilotos na Foto (opcional)</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-32 overflow-y-auto border rounded-md p-2">
+                    {pilots.map((pilot) => (
+                      <label key={pilot.id} className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedPilots.includes(pilot.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedPilots([...selectedPilots, pilot.id]);
+                            } else {
+                              setSelectedPilots(selectedPilots.filter(id => id !== pilot.id));
+                            }
+                          }}
+                          className="rounded"
+                        />
+                        <div className="flex items-center space-x-1">
+                          {pilot.photo_url && (
+                            <img 
+                              src={pilot.photo_url} 
+                              alt={pilot.name}
+                              className="w-4 h-4 rounded-full object-cover"
+                            />
+                          )}
+                          <span className="text-sm">{pilot.name}</span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
                 </div>
                 
                 <div className="space-y-2">
