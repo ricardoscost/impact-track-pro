@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import AdminCalendar from "./pages/AdminCalendar";
 import AdminGallery from "./pages/AdminGallery";
+import AdminGalleryAlbums from "./pages/AdminGalleryAlbums";
 import AdminMetrics from "./pages/AdminMetrics";
 import AdminPilots from "./pages/AdminPilots";
 import AdminSponsors from "./pages/AdminSponsors";
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/calendar" element={<AdminCalendar />} />
             <Route path="/admin/gallery" element={<AdminGallery />} />
+            <Route path="/admin/gallery-albums" element={<AdminGalleryAlbums />} />
             <Route path="/admin/metrics" element={<AdminMetrics />} />
             <Route path="/admin/pilots" element={<AdminPilots />} />
             <Route path="/admin/sponsors" element={<AdminSponsors />} />

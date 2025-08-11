@@ -208,7 +208,7 @@ const Gallery = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-2xl md:text-3xl font-bold">
             {selectedAlbum ? 'Álbum' : 'Galeria Multimédia'}
           </h1>
           <p className="text-muted-foreground">
@@ -220,7 +220,7 @@ const Gallery = () => {
         </div>
         <div className="flex space-x-2">
           {selectedAlbum && (
-            <Button variant="outline" onClick={() => {
+            <Button variant="outline" size="sm" className="gap-1 md:gap-2" onClick={() => {
               setSelectedAlbum(null);
               setViewMode('albums');
             }}>
@@ -228,14 +228,14 @@ const Gallery = () => {
             </Button>
           )}
           <Button 
-            variant={viewMode === 'albums' ? 'default' : 'outline'} 
+            variant={viewMode === 'albums' ? 'default' : 'outline'} size="sm" className="gap-1 md:gap-2" 
             onClick={() => setViewMode('albums')}
           >
             <Grid3X3 className="w-4 h-4" />
             Álbuns
           </Button>
           <Button 
-            variant={viewMode === 'grid' ? 'default' : 'outline'} 
+            variant={viewMode === 'grid' ? 'default' : 'outline'} size="sm" className="gap-1 md:gap-2" 
             onClick={() => setViewMode('grid')}
           >
             <List className="w-4 h-4" />
