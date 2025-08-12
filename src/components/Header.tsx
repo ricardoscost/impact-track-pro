@@ -4,10 +4,11 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import NotificationDropdown from "./NotificationDropdown";
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 const Header = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const isActive = (path: string) => location.pathname === path;
   const navItems = [
@@ -60,9 +61,9 @@ const Header = () => {
           {/* Actions */}
           <div className="flex items-center space-x-2">
             <div className="hidden md:flex items-center space-x-1">
-              <Button aria-label="Português" variant={i18n.language?.startsWith('pt') ? "secondary" : "ghost"} size="icon" onClick={() => i18n.changeLanguage('pt')}>🇵🇹</Button>
-              <Button aria-label="English" variant={i18n.language?.startsWith('en') ? "secondary" : "ghost"} size="icon" onClick={() => i18n.changeLanguage('en')}>🇬🇧</Button>
-              <Button aria-label="Español" variant={i18n.language?.startsWith('es') ? "secondary" : "ghost"} size="icon" onClick={() => i18n.changeLanguage('es')}>🇪🇸</Button>
+              <Button aria-label="Português" variant={i18next.language?.startsWith('pt') ? "secondary" : "ghost"} size="icon" onClick={() => i18next.changeLanguage('pt')}>🇵🇹</Button>
+              <Button aria-label="English" variant={i18next.language?.startsWith('en') ? "secondary" : "ghost"} size="icon" onClick={() => i18next.changeLanguage('en')}>🇬🇧</Button>
+              <Button aria-label="Español" variant={i18next.language?.startsWith('es') ? "secondary" : "ghost"} size="icon" onClick={() => i18next.changeLanguage('es')}>🇪🇸</Button>
             </div>
             <NotificationDropdown />
             <Button 
@@ -82,9 +83,9 @@ const Header = () => {
         <div className="md:hidden border-t bg-card/95 backdrop-blur-md">
           <nav className="container mx-auto px-4 py-4 space-y-2">
             <div className="flex items-center gap-2 mb-2">
-              <Button aria-label="Português" variant={i18n.language?.startsWith('pt') ? "secondary" : "ghost"} className="flex-1" onClick={() => i18n.changeLanguage('pt')}>🇵🇹 Português</Button>
-              <Button aria-label="English" variant={i18n.language?.startsWith('en') ? "secondary" : "ghost"} className="flex-1" onClick={() => i18n.changeLanguage('en')}>🇬🇧 English</Button>
-              <Button aria-label="Español" variant={i18n.language?.startsWith('es') ? "secondary" : "ghost"} className="flex-1" onClick={() => i18n.changeLanguage('es')}>🇪🇸 Español</Button>
+              <Button aria-label="Português" variant={i18next.language?.startsWith('pt') ? "secondary" : "ghost"} className="flex-1" onClick={() => i18next.changeLanguage('pt')}>🇵🇹 Português</Button>
+              <Button aria-label="English" variant={i18next.language?.startsWith('en') ? "secondary" : "ghost"} className="flex-1" onClick={() => i18next.changeLanguage('en')}>🇬🇧 English</Button>
+              <Button aria-label="Español" variant={i18next.language?.startsWith('es') ? "secondary" : "ghost"} className="flex-1" onClick={() => i18next.changeLanguage('es')}>🇪🇸 Español</Button>
             </div>
             {navItems.map((item) => {
               const Icon = item.icon;
