@@ -22,6 +22,7 @@ import AdminPressReleases from "./pages/AdminPressReleases";
 import AdminYouTubeVideos from "./pages/AdminYouTubeVideos";
 import AdminResults from "./pages/AdminResults";
 import NotFound from "./pages/NotFound";
+import RequireAdmin from "./components/RequireAdmin";
 
 const queryClient = new QueryClient();
 
@@ -40,16 +41,16 @@ const App = () => (
             <Route path="/sponsors" element={<Sponsors />} />
             <Route path="/results" element={<Results />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/admin/calendar" element={<AdminCalendar />} />
-            <Route path="/admin/gallery" element={<AdminGallery />} />
-            <Route path="/admin/gallery-albums" element={<AdminGalleryAlbums />} />
-            <Route path="/admin/metrics" element={<AdminMetrics />} />
-            <Route path="/admin/pilots" element={<AdminPilots />} />
-            <Route path="/admin/sponsors" element={<AdminSponsors />} />
-            <Route path="/admin/press-releases" element={<AdminPressReleases />} />
-            <Route path="/admin/youtube-videos" element={<AdminYouTubeVideos />} />
-            <Route path="/admin/results" element={<AdminResults />} />
+            <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
+            <Route path="/admin/calendar" element={<RequireAdmin><AdminCalendar /></RequireAdmin>} />
+            <Route path="/admin/gallery" element={<RequireAdmin><AdminGallery /></RequireAdmin>} />
+            <Route path="/admin/gallery-albums" element={<RequireAdmin><AdminGalleryAlbums /></RequireAdmin>} />
+            <Route path="/admin/metrics" element={<RequireAdmin><AdminMetrics /></RequireAdmin>} />
+            <Route path="/admin/pilots" element={<RequireAdmin><AdminPilots /></RequireAdmin>} />
+            <Route path="/admin/sponsors" element={<RequireAdmin><AdminSponsors /></RequireAdmin>} />
+            <Route path="/admin/press-releases" element={<RequireAdmin><AdminPressReleases /></RequireAdmin>} />
+            <Route path="/admin/youtube-videos" element={<RequireAdmin><AdminYouTubeVideos /></RequireAdmin>} />
+            <Route path="/admin/results" element={<RequireAdmin><AdminResults /></RequireAdmin>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

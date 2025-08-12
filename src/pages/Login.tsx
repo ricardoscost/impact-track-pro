@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Shield } from 'lucide-react';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
@@ -21,8 +21,8 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const success = login(username, password);
-      if (success) {
+      const { error } = await login(email, password);
+      if (!error) {
         toast({
           title: "Login realizado com sucesso",
           description: "Bem-vindo à área de administração",
@@ -31,7 +31,7 @@ const Login = () => {
       } else {
         toast({
           title: "Credenciais inválidas",
-          description: "Username ou password incorretos",
+          description: error,
           variant: "destructive",
         });
       }
@@ -55,12 +55,12 @@ const Login = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
               />

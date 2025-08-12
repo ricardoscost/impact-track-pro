@@ -3,21 +3,20 @@ import { Calendar, Camera, Menu, TrendingUp, X, Award, Users, Trophy } from "luc
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import NotificationDropdown from "./NotificationDropdown";
-import { useTranslation } from "react-i18next";
-import i18next from "i18next";
+
 const Header = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { t } = useTranslation();
 
   const isActive = (path: string) => location.pathname === path;
+
   const navItems = [
-    { path: "/", key: "nav.dashboard", icon: TrendingUp },
-    { path: "/calendar", key: "nav.calendar", icon: Calendar },
-    { path: "/pilots", key: "nav.pilots", icon: Users },
-    { path: "/gallery", key: "nav.gallery", icon: Camera },
-    { path: "/results", key: "nav.results", icon: Trophy },
-    { path: "/sponsors", key: "nav.sponsors", icon: Award },
+    { path: "/", label: "Dashboard", icon: TrendingUp },
+    { path: "/calendar", label: "Calendário", icon: Calendar },
+    { path: "/pilots", label: "Pilotos", icon: Users },
+    { path: "/gallery", label: "Galeria", icon: Camera },
+    { path: "/results", label: "Resultados", icon: Trophy },
+    { path: "/sponsors", label: "Patrocinadores", icon: Award },
   ];
 
   return (
@@ -34,8 +33,8 @@ const Header = () => {
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-chrome">{t('brand.name')}</h1>
-              <p className="text-xs text-muted-foreground">{t('brand.tagline')}</p>
+              <h1 className="text-xl font-bold text-chrome">Hard Enduro Social Club</h1>
+              <p className="text-xs text-muted-foreground">Hard Trails. Good Vibes.</p>
             </div>
           </div>
 
@@ -51,7 +50,7 @@ const Header = () => {
                     className="flex items-center space-x-2"
                   >
                     <Icon className="w-4 h-4" />
-                    <span>{t(item.key)}</span>
+                    <span>{item.label}</span>
                   </Button>
                 </Link>
               );
@@ -60,11 +59,6 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center space-x-2">
-            <div className="hidden md:flex items-center space-x-1">
-              <Button aria-label="Português" variant={i18next.language?.startsWith('pt') ? "secondary" : "ghost"} size="icon" onClick={() => i18next.changeLanguage('pt')}>🇵🇹</Button>
-              <Button aria-label="English" variant={i18next.language?.startsWith('en') ? "secondary" : "ghost"} size="icon" onClick={() => i18next.changeLanguage('en')}>🇬🇧</Button>
-              <Button aria-label="Español" variant={i18next.language?.startsWith('es') ? "secondary" : "ghost"} size="icon" onClick={() => i18next.changeLanguage('es')}>🇪🇸</Button>
-            </div>
             <NotificationDropdown />
             <Button 
               variant="ghost" 
@@ -82,11 +76,6 @@ const Header = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden border-t bg-card/95 backdrop-blur-md">
           <nav className="container mx-auto px-4 py-4 space-y-2">
-            <div className="flex items-center gap-2 mb-2">
-              <Button aria-label="Português" variant={i18next.language?.startsWith('pt') ? "secondary" : "ghost"} className="flex-1" onClick={() => i18next.changeLanguage('pt')}>🇵🇹 Português</Button>
-              <Button aria-label="English" variant={i18next.language?.startsWith('en') ? "secondary" : "ghost"} className="flex-1" onClick={() => i18next.changeLanguage('en')}>🇬🇧 English</Button>
-              <Button aria-label="Español" variant={i18next.language?.startsWith('es') ? "secondary" : "ghost"} className="flex-1" onClick={() => i18next.changeLanguage('es')}>🇪🇸 Español</Button>
-            </div>
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -96,7 +85,7 @@ const Header = () => {
                     className="w-full justify-start"
                   >
                     <Icon className="w-4 h-4 mr-2" />
-                    {t(item.key)}
+                    {item.label}
                   </Button>
                 </Link>
               );
