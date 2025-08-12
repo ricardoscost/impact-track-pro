@@ -12,7 +12,8 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const [isSignUp, setIsSignUp] = useState(false);
+  const { login, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -21,19 +22,36 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await login(email, password);
-      if (!error) {
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo à área de administração",
-        });
-        navigate('/admin');
+      if (isSignUp) {
+        const { error } = await signUp(email, password);
+        if (!error) {
+          toast({
+            title: 'Conta criada com sucesso',
+            description: 'Verifique o seu email para confirmar a conta.',
+          });
+          // Após confirmar email, faça login e será redirecionado
+        } else {
+          toast({
+            title: 'Erro ao criar conta',
+            description: error,
+            variant: 'destructive',
+          });
+        }
       } else {
-        toast({
-          title: "Credenciais inválidas",
-          description: error,
-          variant: "destructive",
-        });
+        const { error } = await login(email, password);
+        if (!error) {
+          toast({
+            title: 'Login realizado com sucesso',
+            description: 'Bem-vindo à área de administração',
+          });
+          navigate('/admin');
+        } else {
+          toast({
+            title: 'Credenciais inválidas',
+            description: error,
+            variant: 'destructive',
+          });
+        }
       }
     } finally {
       setIsLoading(false);
@@ -47,9 +65,9 @@ const Login = () => {
           <div className="mx-auto w-12 h-12 gradient-primary rounded-lg flex items-center justify-center mb-4">
             <Shield className="w-6 h-6 text-white" />
           </div>
-          <CardTitle className="text-2xl">Admin Login</CardTitle>
+          <CardTitle className="text-2xl">{isSignUp ? 'Criar conta' : 'Admin Login'}</CardTitle>
           <p className="text-muted-foreground">
-            Acesso restrito à área de administração
+            {isSignUp ? 'Crie a sua conta para aceder' : 'Acesso restrito à área de administração'}
           </p>
         </CardHeader>
         <CardContent>
@@ -82,8 +100,18 @@ const Login = () => {
               variant="gradient"
               disabled={isLoading}
             >
-              {isLoading ? 'Entrando...' : 'Entrar'}
+              {isLoading ? (isSignUp ? 'A criar...' : 'Entrando...') : (isSignUp ? 'Criar conta' : 'Entrar')}
             </Button>
+            <div className="text-center text-sm text-muted-foreground">
+              {isSignUp ? 'Já tem conta?' : 'Ainda não tem conta?'}{' '}
+              <button
+                type="button"
+                className="underline"
+                onClick={() => setIsSignUp(!isSignUp)}
+              >
+                {isSignUp ? 'Entrar' : 'Criar conta'}
+              </button>
+            </div>
           </form>
         </CardContent>
       </Card>

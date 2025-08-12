@@ -9,6 +9,7 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
+  signUp: (email: string, password: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
 }
 
@@ -58,13 +59,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (error) return { error: error.message };
     return {};
   };
-
+  
+  const signUp = async (email: string, password: string) => {
+    const redirectUrl = `${window.location.origin}/`;
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: redirectUrl }
+    });
+    if (error) return { error: error.message };
+    return {};
+  };
+  
   const logout = async () => {
     await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAuthenticated: !!user, isAdmin, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, session, isAuthenticated: !!user, isAdmin, loading, login, signUp, logout }}>
       {children}
     </AuthContext.Provider>
   );
