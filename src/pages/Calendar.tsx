@@ -11,7 +11,8 @@ import {
   Users, 
   Clock, 
   Plus,
-  Filter
+  Filter,
+  ExternalLink
 } from "lucide-react";
 
 const Calendar = () => {
@@ -235,6 +236,26 @@ const Calendar = () => {
                       <div>
                         <h4 className="font-medium mb-2">Descrição:</h4>
                         <p className="text-muted-foreground">{event.description}</p>
+                      </div>
+                    )}
+                    
+                    {event.links && event.links.length > 0 && (
+                      <div>
+                        <h4 className="font-medium mb-2">Links:</h4>
+                        <div className="space-y-2">
+                          {event.links.map((link: any, index: number) => (
+                            <a
+                              key={index}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-smooth"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                              <span>{link.title}</span>
+                            </a>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>

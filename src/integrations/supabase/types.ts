@@ -174,6 +174,7 @@ export type Database = {
           date: string
           description: string | null
           id: string
+          links: Json | null
           location: string
           participants: number | null
           sponsors: number | null
@@ -189,6 +190,7 @@ export type Database = {
           date: string
           description?: string | null
           id?: string
+          links?: Json | null
           location: string
           participants?: number | null
           sponsors?: number | null
@@ -204,6 +206,7 @@ export type Database = {
           date?: string
           description?: string | null
           id?: string
+          links?: Json | null
           location?: string
           participants?: number | null
           sponsors?: number | null
