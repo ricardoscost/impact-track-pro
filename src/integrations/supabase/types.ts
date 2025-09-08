@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -307,6 +307,7 @@ export type Database = {
           id: string
           image_url: string
           is_featured: boolean | null
+          item_date: string | null
           tags: string[] | null
           title: string
           type: string
@@ -320,6 +321,7 @@ export type Database = {
           id?: string
           image_url: string
           is_featured?: boolean | null
+          item_date?: string | null
           tags?: string[] | null
           title: string
           type?: string
@@ -333,6 +335,7 @@ export type Database = {
           id?: string
           image_url?: string
           is_featured?: boolean | null
+          item_date?: string | null
           tags?: string[] | null
           title?: string
           type?: string
@@ -1258,6 +1261,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_album_cover_image: {
+        Args: { album_uuid: string }
+        Returns: string
+      }
       get_current_user_is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
