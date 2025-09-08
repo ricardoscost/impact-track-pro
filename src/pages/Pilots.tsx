@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import Header from "@/components/Header";
 import PilotDetailDialog from "@/components/PilotDetailDialog";
+import PilotGallery from "@/components/PilotGallery";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -236,6 +237,12 @@ const Pilots = () => {
           open={dialogOpen}
           onOpenChange={setDialogOpen}
         />
+        
+        {selectedPilot && (
+          <div className="mt-8">
+            <PilotGallery pilotId={selectedPilot.id} pilotName={selectedPilot.name} />
+          </div>
+        )}
       </main>
     </div>
   );

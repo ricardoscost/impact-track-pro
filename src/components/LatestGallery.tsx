@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Camera, Video, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
+import GalleryModal from "./GalleryModal";
 
 interface GalleryItem {
   id: string;
@@ -18,6 +19,8 @@ interface GalleryItem {
 const LatestGallery = () => {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
     fetchLatestItems();
@@ -75,10 +78,17 @@ const LatestGallery = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {items.map((item) => {
+            {items.map((item, index) => {
               const TypeIcon = getTypeIcon(item.type);
               return (
-                <div key={item.id} className="relative group cursor-pointer">
+                <div 
+                  key={item.id} 
+                  className="relative group cursor-pointer"
+                  onClick={() => {
+                    setSelectedIndex(index);
+                    setModalOpen(true);
+                  }}
+                >
                   <div className="aspect-square overflow-hidden rounded-lg">
                     <img
                       src={item.image_url}
@@ -113,6 +123,13 @@ const LatestGallery = () => {
             })}
           </div>
         )}
+        
+        <GalleryModal
+          items={items}
+          currentIndex={selectedIndex}
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+        />
       </CardContent>
     </Card>
   );

@@ -27,6 +27,9 @@ const AdminCalendar = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [showEditForm, setShowEditForm] = useState(false);
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -123,7 +126,78 @@ const AdminCalendar = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleEdit = (event: any) => {
+    setEditingEvent(event);
+    setFormData({
+      title: event.title,
+      description: event.description || '',
+      date: event.date,
+      time: event.time,
+      location: event.location,
+      type: event.type,
+      status: event.status,
+      participants: event.participants.toString(),
+      sponsors: event.sponsors.toString(),
+      background_image_url: event.background_image_url || '',
+      links: event.links && event.links.length > 0 ? event.links : [{ title: '', url: '' }]
+    });
+    setShowEditForm(true);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEvent) return;
+
+    try {
+      const { error } = await supabase
+        .from('events')
+        .update({
+          title: formData.title,
+          description: formData.description,
+          date: formData.date,
+          time: formData.time,
+          location: formData.location,
+          type: formData.type,
+          status: formData.status,
+          participants: parseInt(formData.participants) || 0,
+          sponsors: parseInt(formData.sponsors) || 0,
+          background_image_url: formData.background_image_url,
+          links: formData.links.filter(link => link.title && link.url)
+        })
+        .eq('id', editingEvent.id);
+      
+      if (error) throw error;
+      
+      await fetchEvents();
+      setFormData({
+        title: '',
+        description: '',
+        date: '',
+        time: '',
+        location: '',
+        type: '',
+        status: 'scheduled',
+        participants: '',
+        sponsors: '',
+        background_image_url: '',
+        links: [{ title: '', url: '' }]
+      });
+      setEditingEvent(null);
+      setShowEditForm(false);
+      
+      toast({
+        title: "Evento atualizado",
+        description: "O evento foi atualizado com sucesso",
+      });
+    } catch (error) {
+      console.error('Error updating event:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar evento",
+        variant: "destructive"
+      });
+    }
+  };
     try {
       const { error } = await supabase
         .from('events')
@@ -178,12 +252,215 @@ const AdminCalendar = () => {
               </p>
             </div>
           </div>
-          <Button variant="gradient" onClick={() => setShowForm(!showForm)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Evento
-          </Button>
-        </div>
+                    <Button variant="gradient" onClick={() => {
+                      setEditingEvent(null);
+                      setFormData({
+                        title: '',
+                        description: '',
+                        date: '',
+                        time: '',
+                        location: '',
+                        type: '',
+                        status: 'scheduled',
+                        participants: '',
+                        sponsors: '',
+                        background_image_url: '',
+                        links: [{ title: '', url: '' }]
+                      });
+                      setShowForm(!showForm);
+                    }}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Novo Evento
+                    </Button>
+                  </div>
+                </div>
 
+                {/* Edit Form */}
+                {showEditForm && editingEvent && (
+                  <Card className="mb-8">
+                    <CardHeader>
+                      <CardTitle>Editar Evento</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="edit_title">Título do Evento</Label>
+                          <Input
+                            id="edit_title"
+                            value={formData.title}
+                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                            required
+                          />
+                        </div>
+                        
+                         <div className="space-y-2">
+                           <Label htmlFor="edit_type">Tipo</Label>
+                           <Input
+                             id="edit_type"
+                             value={formData.type}
+                             onChange={(e) => setFormData({...formData, type: e.target.value})}
+                             placeholder="ex: Trail, Maratona, Treino"
+                             required
+                           />
+                         </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="edit_date">Data</Label>
+                          <Input
+                            id="edit_date"
+                            type="date"
+                            value={formData.date}
+                            onChange={(e) => setFormData({...formData, date: e.target.value})}
+                            required
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="edit_time">Hora</Label>
+                          <Input
+                            id="edit_time"
+                            type="time"
+                            value={formData.time}
+                            onChange={(e) => setFormData({...formData, time: e.target.value})}
+                            required
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="edit_location">Localização</Label>
+                          <Input
+                            id="edit_location"
+                            value={formData.location}
+                            onChange={(e) => setFormData({...formData, location: e.target.value})}
+                            required
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="edit_participants">Participantes</Label>
+                          <Input
+                            id="edit_participants"
+                            type="number"
+                            value={formData.participants}
+                            onChange={(e) => setFormData({...formData, participants: e.target.value})}
+                            required
+                          />
+                        </div>
+                        
+                         <div className="space-y-2">
+                           <Label htmlFor="edit_status">Estado</Label>
+                           <select
+                             id="edit_status"
+                             value={formData.status}
+                             onChange={(e) => setFormData({...formData, status: e.target.value})}
+                             className="w-full px-3 py-2 border rounded-md"
+                           >
+                             <option value="scheduled">Agendado</option>
+                             <option value="registered">Inscrito</option>
+                             <option value="confirmed">Confirmado</option>
+                           </select>
+                         </div>
+                        
+                         <div className="space-y-2">
+                           <Label htmlFor="edit_sponsors">Número de Patrocinadores</Label>
+                           <Input
+                             id="edit_sponsors"
+                             type="number"
+                             value={formData.sponsors}
+                             onChange={(e) => setFormData({...formData, sponsors: e.target.value})}
+                             placeholder="0"
+                           />
+                         </div>
+                         
+                         <div className="space-y-2">
+                           <Label htmlFor="edit_description">Descrição</Label>
+                           <Textarea
+                             id="edit_description"
+                             value={formData.description}
+                             onChange={(e) => setFormData({...formData, description: e.target.value})}
+                             placeholder="Descrição do evento"
+                           />
+                         </div>
+                         
+                         <div className="space-y-2">
+                           <Label htmlFor="edit_background_image_url">URL da Imagem de Fundo</Label>
+                           <Input
+                             id="edit_background_image_url"
+                             value={formData.background_image_url}
+                             onChange={(e) => setFormData({...formData, background_image_url: e.target.value})}
+                             placeholder="https://example.com/image.jpg"
+                           />
+                         </div>
+                         
+                         <div className="md:col-span-2 space-y-4">
+                           <div className="flex items-center justify-between">
+                             <Label>Links (Opcionais)</Label>
+                             <Button
+                               type="button"
+                               variant="outline"
+                               size="sm"
+                               onClick={() => setFormData({
+                                 ...formData,
+                                 links: [...formData.links, { title: '', url: '' }]
+                               })}
+                             >
+                               <Plus className="w-4 h-4 mr-2" />
+                               Adicionar Link
+                             </Button>
+                           </div>
+                           {formData.links.map((link, index) => (
+                             <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                               <Input
+                                 placeholder="Título do link (ex: Inscrições, Documentos)"
+                                 value={link.title}
+                                 onChange={(e) => {
+                                   const newLinks = [...formData.links];
+                                   newLinks[index].title = e.target.value;
+                                   setFormData({...formData, links: newLinks});
+                                 }}
+                               />
+                               <div className="flex space-x-2">
+                                 <Input
+                                   placeholder="URL do link"
+                                   value={link.url}
+                                   onChange={(e) => {
+                                     const newLinks = [...formData.links];
+                                     newLinks[index].url = e.target.value;
+                                     setFormData({...formData, links: newLinks});
+                                   }}
+                                 />
+                                 <Button
+                                   type="button"
+                                   variant="outline"
+                                   size="icon"
+                                   onClick={() => {
+                                     const newLinks = formData.links.filter((_, i) => i !== index);
+                                     setFormData({...formData, links: newLinks});
+                                   }}
+                                 >
+                                   <Trash className="w-4 h-4" />
+                                 </Button>
+                               </div>
+                             </div>
+                           ))}
+                         </div>
+                        
+                        <div className="md:col-span-3 flex space-x-2">
+                          <Button type="submit" variant="gradient">
+                            Atualizar Evento
+                          </Button>
+                          <Button type="button" variant="outline" onClick={() => {
+                            setShowEditForm(false);
+                            setEditingEvent(null);
+                          }}>
+                            Cancelar
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                )}
+        
         {/* Form */}
         {showForm && (
           <Card className="mb-8">
@@ -422,7 +699,7 @@ const AdminCalendar = () => {
                     >
                       {event.status}
                     </Badge>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" onClick={() => handleEdit(event)}>
                       <Edit className="w-4 h-4" />
                     </Button>
                     <Button 
@@ -432,9 +709,9 @@ const AdminCalendar = () => {
                     >
                       <Trash className="w-4 h-4" />
                     </Button>
-                  </div>
+                   </div>
                  </div>
-               ))
+                ))}
               )}
             </div>
           </CardContent>

@@ -80,7 +80,8 @@ const Gallery = () => {
         .select(`
           *,
           event:events(id, title, date),
-          gallery_items(count)
+          gallery_items(count),
+          gallery_items!inner(image_url)
         `)
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
@@ -89,7 +90,8 @@ const Gallery = () => {
       
       const albumsWithCount = data?.map(album => ({
         ...album,
-        items_count: album.gallery_items?.[0]?.count || 0
+        items_count: album.gallery_items?.[0]?.count || 0,
+        cover_image_url: album.gallery_items?.[0]?.image_url || album.cover_image_url || '/placeholder.svg'
       })) || [];
       
       setAlbums(albumsWithCount);
@@ -209,11 +211,14 @@ const Gallery = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">
-            {selectedAlbum ? 'Álbum' : 'Galeria Multimédia'}
+            {selectedAlbum 
+              ? albums.find(a => a.id === selectedAlbum)?.title || 'Álbum'
+              : 'Galeria Multimédia'
+            }
           </h1>
           <p className="text-muted-foreground">
             {selectedAlbum 
-              ? 'Fotografias do álbum selecionado'
+              ? `Fotografias de ${albums.find(a => a.id === selectedAlbum)?.title || 'álbum selecionado'}`
               : 'Conteúdos organizados por eventos e álbuns'
             }
           </p>
