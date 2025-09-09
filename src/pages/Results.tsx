@@ -65,7 +65,7 @@ const Results = () => {
           )
         `)
         .eq('is_active', true)
-        .order('event_id')
+        .order('events(date)', { ascending: false })
         .order('position', { ascending: true });
 
       if (error) throw error;
@@ -73,7 +73,7 @@ const Results = () => {
       const resultsData = data || [];
       setResults(resultsData);
 
-      // Group results by event
+      // Group results by event and maintain date order
       const grouped = resultsData.reduce((acc, result) => {
         const eventId = result.event_id;
         if (!acc[eventId]) {
@@ -154,7 +154,14 @@ const Results = () => {
         </div>
 
         <div className="space-y-8">
-          {Object.entries(groupedResults).map(([eventId, eventResults]) => {
+          {Object.entries(groupedResults)
+            .sort(([, resultsA], [, resultsB]) => {
+              // Sort events by date (most recent first)
+              const dateA = new Date(resultsA[0]?.event?.date || '');
+              const dateB = new Date(resultsB[0]?.event?.date || '');
+              return dateB.getTime() - dateA.getTime();
+            })
+            .map(([eventId, eventResults]) => {
             const event = eventResults[0]?.event as Event;
             if (!event) return null;
 
