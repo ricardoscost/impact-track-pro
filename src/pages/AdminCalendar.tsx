@@ -136,12 +136,13 @@ const AdminCalendar = () => {
       location: event.location,
       type: event.type,
       status: event.status,
-      participants: event.participants.toString(),
-      sponsors: event.sponsors.toString(),
+      participants: event.participants ? event.participants.toString() : '0',
+      sponsors: event.sponsors ? event.sponsors.toString() : '0',
       background_image_url: event.background_image_url || '',
       links: event.links && event.links.length > 0 ? event.links : [{ title: '', url: '' }]
     });
     setShowEditForm(true);
+    setShowForm(false); // Hide create form if open
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -257,6 +258,7 @@ const AdminCalendar = () => {
           <div>
             <Button variant="gradient" onClick={() => {
               setEditingEvent(null);
+              setShowEditForm(false); // Close edit form
               setFormData({
                 title: '',
                 description: '',
@@ -278,34 +280,34 @@ const AdminCalendar = () => {
           </div>
         </div>
 
-                {/* Edit Form */}
-                {showEditForm && editingEvent && (
-                  <Card className="mb-8">
-                    <CardHeader>
-                      <CardTitle>Editar Evento</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="edit_title">Título do Evento</Label>
-                          <Input
-                            id="edit_title"
-                            value={formData.title}
-                            onChange={(e) => setFormData({...formData, title: e.target.value})}
-                            required
-                          />
-                        </div>
-                        
-                         <div className="space-y-2">
-                           <Label htmlFor="edit_type">Tipo</Label>
-                           <Input
-                             id="edit_type"
-                             value={formData.type}
-                             onChange={(e) => setFormData({...formData, type: e.target.value})}
-                             placeholder="ex: Trail, Maratona, Treino"
-                             required
-                           />
-                         </div>
+        {/* Edit Form */}
+        {showEditForm && editingEvent && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Editar Evento - {editingEvent.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit_title">Título do Evento</Label>
+                  <Input
+                    id="edit_title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit_type">Tipo</Label>
+                  <Input
+                    id="edit_type"
+                    value={formData.type}
+                    onChange={(e) => setFormData({...formData, type: e.target.value})}
+                    placeholder="ex: Trail, Maratona, Treino"
+                    required
+                  />
+                </div>
                         
                         <div className="space-y-2">
                           <Label htmlFor="edit_date">Data</Label>
