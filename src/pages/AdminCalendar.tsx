@@ -252,28 +252,29 @@ const AdminCalendar = () => {
               </p>
             </div>
           </div>
-                    <Button variant="gradient" onClick={() => {
-                      setEditingEvent(null);
-                      setFormData({
-                        title: '',
-                        description: '',
-                        date: '',
-                        time: '',
-                        location: '',
-                        type: '',
-                        status: 'scheduled',
-                        participants: '',
-                        sponsors: '',
-                        background_image_url: '',
-                        links: [{ title: '', url: '' }]
-                      });
-                      setShowForm(!showForm);
-                    }}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Novo Evento
-                    </Button>
-                  </div>
-                </div>
+          <div>
+            <Button variant="gradient" onClick={() => {
+              setEditingEvent(null);
+              setFormData({
+                title: '',
+                description: '',
+                date: '',
+                time: '',
+                location: '',
+                type: '',
+                status: 'scheduled',
+                participants: '',
+                sponsors: '',
+                background_image_url: '',
+                links: [{ title: '', url: '' }]
+              });
+              setShowForm(!showForm);
+            }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Evento
+            </Button>
+          </div>
+        </div>
 
                 {/* Edit Form */}
                 {showEditForm && editingEvent && (
@@ -711,8 +712,8 @@ const AdminCalendar = () => {
                     </Button>
                    </div>
                  </div>
-                ))}
-              )}
+                 ))
+               )}
             </div>
           </CardContent>
         </Card>
