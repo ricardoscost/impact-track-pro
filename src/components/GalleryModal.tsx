@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Download, X } from "lucide-react";
@@ -21,6 +21,33 @@ interface GalleryModalProps {
 
 const GalleryModal = ({ items, currentIndex, isOpen, onClose }: GalleryModalProps) => {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [touchEndX, setTouchEndX] = useState(0);
+
+  useEffect(() => {
+    setActiveIndex(currentIndex);
+  }, [currentIndex]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+      
+      switch (e.key) {
+        case 'ArrowLeft':
+          handlePrevious();
+          break;
+        case 'ArrowRight':
+          handleNext();
+          break;
+        case 'Escape':
+          onClose();
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
 
   const handlePrevious = () => {
     setActiveIndex((prev) => (prev > 0 ? prev - 1 : items.length - 1));
@@ -28,6 +55,29 @@ const GalleryModal = ({ items, currentIndex, isOpen, onClose }: GalleryModalProp
 
   const handleNext = () => {
     setActiveIndex((prev) => (prev < items.length - 1 ? prev + 1 : 0));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX || !touchEndX) return;
+    
+    const distance = touchStartX - touchEndX;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe && items.length > 1) {
+      handleNext();
+    }
+    if (isRightSwipe && items.length > 1) {
+      handlePrevious();
+    }
   };
 
   const handleDownload = async (imageUrl: string, title: string) => {
@@ -89,7 +139,12 @@ const GalleryModal = ({ items, currentIndex, isOpen, onClose }: GalleryModalProp
           )}
 
           {/* Main image */}
-          <div className="flex items-center justify-center h-full p-4">
+          <div 
+            className="flex items-center justify-center h-full p-4"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <img
               src={currentItem.image_url}
               alt={currentItem.title}

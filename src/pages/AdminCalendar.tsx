@@ -198,6 +198,8 @@ const AdminCalendar = () => {
       });
     }
   };
+
+  const handleDelete = async (id: string) => {
     try {
       const { error } = await supabase
         .from('events')
