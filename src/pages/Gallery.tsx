@@ -79,20 +79,38 @@ const Gallery = () => {
         .from('gallery_albums')
         .select(`
           *,
-          event:events(id, title, date),
-          gallery_items(count),
-          gallery_items!inner(image_url)
+          event:events(id, title, date)
         `)
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
       
       if (error) throw error;
       
-      const albumsWithCount = data?.map(album => ({
-        ...album,
-        items_count: album.gallery_items?.[0]?.count || 0,
-        cover_image_url: album.gallery_items?.[0]?.image_url || album.cover_image_url || '/placeholder.svg'
-      })) || [];
+      // Get items count and cover image for each album
+      const albumsWithCount = await Promise.all(
+        (data || []).map(async (album) => {
+          const { data: itemsData, error: itemsError } = await supabase
+            .from('gallery_items')
+            .select('id, image_url')
+            .eq('album_id', album.id)
+            .order('created_at', { ascending: false });
+          
+          if (itemsError) {
+            console.error('Error fetching album items:', itemsError);
+            return {
+              ...album,
+              items_count: 0,
+              cover_image_url: album.cover_image_url || '/placeholder.svg'
+            };
+          }
+          
+          return {
+            ...album,
+            items_count: itemsData?.length || 0,
+            cover_image_url: itemsData?.[0]?.image_url || album.cover_image_url || '/placeholder.svg'
+          };
+        })
+      );
       
       setAlbums(albumsWithCount);
     } catch (error) {

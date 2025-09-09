@@ -44,13 +44,22 @@ const PilotDetailDialog = ({ pilot, open, onOpenChange }: PilotDetailDialogProps
       if (!pilot?.id) return [];
       
       const { data, error } = await supabase
-        .from("gallery_items")
-        .select("*")
-        .contains("tags", [pilot.id])
+        .from("gallery_item_pilots")
+        .select(`
+          gallery_item:gallery_items(
+            id,
+            title,
+            description,
+            image_url,
+            type,
+            created_at
+          )
+        `)
+        .eq("pilot_id", pilot.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data?.map(item => item.gallery_item).filter(Boolean) || [];
     },
     enabled: !!pilot?.id && open,
   });
